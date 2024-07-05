@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class InitPath : MonoBehaviour
 {
+    public string landType;
+
     void Awake() { }
 
     public void AddNewPath()

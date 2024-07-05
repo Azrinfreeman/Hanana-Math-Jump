@@ -7,6 +7,7 @@ TagManager:
   - jumpTrigger
   - spawnTrigger
   - jumpTriggerEdge
+  - floorCollsion
   layers:
   - Default
   - TransparentFX

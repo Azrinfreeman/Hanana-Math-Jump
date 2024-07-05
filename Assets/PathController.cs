@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters;
@@ -15,6 +16,9 @@ public class PathController : MonoBehaviour
     private float moveSpeed;
 
     public float DistanceBetween;
+
+    [Header("SteppingLands")]
+    public string LandType;
 
     // Start is called before the first frame update
     void Start()
@@ -39,6 +43,7 @@ public class PathController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Debug.Log("roattioin : " + transform.localEulerAngles.y);
         if (PathwayController.instance.pointIndex <= PathwayController.instance.Points.Count - 1)
         {
             anim.SetBool("isRunning", true);
@@ -56,7 +61,7 @@ public class PathController : MonoBehaviour
             Vector3 player = transform.position;
             Vector3 obstacles = ObstaclesController.instance.ObstaclesList[0].position;
             DistanceBetween = (obstacles - player).magnitude;
-            Debug.Log("Distance: " + DistanceBetween);
+            //Debug.Log("Distance: " + DistanceBetween);
 
             // compute what we want to move
             Vector3 towards =
@@ -89,14 +94,14 @@ public class PathController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("jumpTrigger"))
         {
-            Debug.Log("jump");
+            // Debug.Log("jump");
             anim.SetTrigger("isJumping");
             rb.AddForce(jump * jumpForce, ForceMode.Impulse);
         }
 
         if (other.gameObject.tag.Equals("jumpTriggerEdge"))
         {
-            Debug.Log("jumpEdge");
+            // Debug.Log("jumpEdge");
             anim.SetTrigger("isJumping");
             rb.AddForce(jump * jumpForce, ForceMode.Impulse);
         }
@@ -106,8 +111,17 @@ public class PathController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("jumpTrigger"))
         {
-            Debug.Log("exitjump");
+            // Debug.Log("exitjump");
             //ObstaclesController.instance.ObstaclesList.RemoveAt(0);
+        }
+    }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag.Equals("floorCollsion"))
+        {
+            //Debug.Log("GreenGrass");
+            LandType = other.transform.parent.transform.parent.GetComponent<InitPath>().landType;
         }
     }
 }
