@@ -20,6 +20,7 @@ public class objectTrigger : MonoBehaviour
 
     IEnumerator triggerMoney()
     {
+        gameObject.GetComponent<MeshRenderer>().enabled = false;
         GameController.instance.moneyTransform.GetComponent<Animator>().Play("collected");
 
         yield return new WaitForSeconds(0.45f);

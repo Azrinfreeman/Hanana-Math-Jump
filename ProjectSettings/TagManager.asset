@@ -8,6 +8,8 @@ TagManager:
   - spawnTrigger
   - jumpTriggerEdge
   - floorCollsion
+  - crashTrigger
+  - level
   layers:
   - Default
   - TransparentFX

@@ -3,7 +3,12 @@ guid: 1d4940e5502df244e90b01038920eb54
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 10450_Rectangular_Grass_Patch_v1
+    second: {fileID: 2100000, guid: 578d55579a6efee48b2d602ad026aca7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

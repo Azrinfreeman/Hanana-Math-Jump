@@ -28,6 +28,10 @@ public class InitPath : MonoBehaviour
                 transform.Find("Obstacles").GetComponent<Transform>().GetChild(i).transform
             );
         }
+
+        ObstaclesController.instance.TriggerJumpList.Add(
+            transform.Find("triggerEdge").GetComponent<Transform>().transform
+        );
     }
 
     // Start is called before the first frame update

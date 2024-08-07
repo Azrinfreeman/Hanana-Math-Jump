@@ -8,6 +8,8 @@ public class ObstaclesController : MonoBehaviour
 
     public List<Transform> ObstaclesList;
 
+    public List<Transform> TriggerJumpList;
+
     void Awake()
     {
         instance = this;
