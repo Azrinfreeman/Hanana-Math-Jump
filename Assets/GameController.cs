@@ -10,6 +10,8 @@ public class GameController : MonoBehaviour
 {
     public System.Random rnd = new System.Random();
     public System.Random rnd2 = new System.Random();
+
+    public List<AudioSource> music;
     public static GameController instance;
     public Transform FreeLookCamera;
 
@@ -54,8 +56,12 @@ public class GameController : MonoBehaviour
     [Header("Buttons")]
     public List<Button> ansButton;
 
+    [Header("TimeToAnswer")]
+    public Transform Timing;
     [Header("references")]
     public PathController pathController;
+
+    public EventSystem eventSystem;
 
     IEnumerator collectedRound()
     {
@@ -85,7 +91,28 @@ public class GameController : MonoBehaviour
                 .enabled = false;
         }
 
-        //Collect the round count
+        //collect stars and timer
+        if (TimeToAnswer.instance.maxTime > 8 && TimeToAnswer.instance.maxTime < 10)
+        {
+            CollectionController.instance.stars += 10;
+        }
+        else if (TimeToAnswer.instance.maxTime > 4 && TimeToAnswer.instance.maxTime <= 8)
+        {
+            int t3;
+            t3 = (int)TimeToAnswer.instance.maxTime;
+            CollectionController.instance.stars += t3;
+        }
+        else if (TimeToAnswer.instance.maxTime > 0 && TimeToAnswer.instance.maxTime <= 4)
+        {
+            CollectionController.instance.stars += 3;
+        }
+
+        moneyTransform.GetComponent<Animator>().Play("collected");
+        yield return new WaitForSeconds(0.45f);
+        GameObject.Find("collected").GetComponent<AudioSource>().Play();
+        moneyTransform.GetComponent<Animator>().Play("afterCollected");
+
+        //Collect the round count 
         CollectionController.instance.rounds++;
         roundTransform.GetComponent<Animator>().Play("collected");
 
@@ -229,6 +256,8 @@ public class GameController : MonoBehaviour
     {
         if (!isQuestionShowUp)
         {
+            pathController.timeToReach.gameObject.SetActive(false);
+            Timing.gameObject.SetActive(true);
             operation = rnd2.Next(2);
             //if else level
             if (level == 1)
@@ -283,7 +312,14 @@ public class GameController : MonoBehaviour
                     Debug.Log("more than 80");
                     firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
                     secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    pathController.SetFirstChildToLast();
+
+                    //change character
+                    if (enterLevel[4] == false)
+                    {
+                        pathController.SetFirstChildToLast();
+                        enterLevel[3] = false;
+                        enterLevel[4] = true;
+                    }
                 }
                 answers = firstNum + secNum;
             }
@@ -342,7 +378,12 @@ public class GameController : MonoBehaviour
                         secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
 
                         //change character
-                        pathController.SetFirstChildToLast();
+                        if (enterLevel[4] == false)
+                        {
+                            pathController.SetFirstChildToLast();
+                            enterLevel[3] = false;
+                            enterLevel[4] = true;
+                        }
                     }
                     answers = firstNum + secNum;
                 }
@@ -421,7 +462,13 @@ public class GameController : MonoBehaviour
                             secNum = rnd.Next(0, 41);
                             firstNum = rnd.Next(0, 41);
                         }
-                        pathController.SetFirstChildToLast();
+                        //change character
+                        if (enterLevel[4] == false)
+                        {
+                            pathController.SetFirstChildToLast();
+                            enterLevel[3] = false;
+                            enterLevel[4] = true;
+                        }
                     }
                     answers = secNum - firstNum;
                 }
@@ -715,6 +762,7 @@ public class GameController : MonoBehaviour
     {
         if (!isQuestionShowUp)
         {
+            Timing.gameObject.SetActive(true);
             operation = rnd2.Next(2);
             //if else level
             if (level == 1)
@@ -770,6 +818,13 @@ public class GameController : MonoBehaviour
                     firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
                     secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
                     //pathController.SetFirstChildToLast();
+                    //change character
+                    if (enterLevel[4] == false)
+                    {
+                        pathController.SetFirstChildToLast();
+                        enterLevel[3] = false;
+                        enterLevel[4] = true;
+                    }
                 }
                 answers = firstNum + secNum;
             }
@@ -828,7 +883,12 @@ public class GameController : MonoBehaviour
                         secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
 
                         //change character
-                        //pathController.SetFirstChildToLast();
+                        if (enterLevel[4] == false)
+                        {
+                            pathController.SetFirstChildToLast();
+                            enterLevel[3] = false;
+                            enterLevel[4] = true;
+                        }
                     }
                     answers = firstNum + secNum;
                 }
@@ -907,7 +967,13 @@ public class GameController : MonoBehaviour
                             secNum = rnd.Next(0, 41);
                             firstNum = rnd.Next(0, 41);
                         }
-                        //pathController.SetFirstChildToLast();
+                        //change character
+                        if (enterLevel[4] == false)
+                        {
+                            pathController.SetFirstChildToLast();
+                            enterLevel[3] = false;
+                            enterLevel[4] = true;
+                        }
                     }
                     answers = secNum - firstNum;
                 }
@@ -1271,12 +1337,15 @@ public class GameController : MonoBehaviour
         isQuestionShowUp = false;
         pathController.isOriginalDistance = false;
         pathController.timeToReach.gameObject.SetActive(false);
+
+        //tiing
+        Timing.gameObject.SetActive(false);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        enterLevel = new bool[4];
+        enterLevel = new bool[5];
         enterLevel[0] = true;
         Bg = transform.Find("bg").GetComponent<Transform>();
         endMenuScreen = transform.Find("EndScreen").GetComponent<Transform>();
@@ -1284,7 +1353,7 @@ public class GameController : MonoBehaviour
         roundTransform = transform.GetChild(1).transform.GetChild(1).GetComponent<Transform>();
         pathController = GameObject.Find("Player").GetComponent<PathController>();
         levelText = transform.GetChild(4).transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        questionCount = 81;
+        questionCount = 0;
         //Time.timeScale = 1;
         gameStart = false;
         SettingBtn = GameObject.Find("SettingButton").transform.GetChild(0).GetComponent<Button>();
@@ -1344,10 +1413,18 @@ public class GameController : MonoBehaviour
     {
         //Time.timeScale = 1;
         CameraAnim.Play("startCameraAnimation");
-        yield return new WaitForSeconds(2.3f);
-
         level = Int32.Parse(EventSystem.current.currentSelectedGameObject.name);
+        eventSystem.enabled = false;
+        yield return new WaitForSeconds(2.3f);
+        eventSystem.enabled = true;
+
         gameStart = true;
+
+        if (!music[1].isPlaying)
+        {
+            music[0].Stop();
+            music[1].Play();
+        }
 
         FreeLookCamera.gameObject.SetActive(true);
         CameraAnim.enabled = false;

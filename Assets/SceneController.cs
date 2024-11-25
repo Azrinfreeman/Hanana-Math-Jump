@@ -14,10 +14,15 @@ public class SceneController : MonoBehaviour
     public void RestartScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Time.timeScale = 1f;
     }
 
     public void FinishSplash()
     {
         SceneManager.LoadScene("MainGame");
+    }
+
+    public void ExitGame(){
+        Application.Quit();
     }
 }

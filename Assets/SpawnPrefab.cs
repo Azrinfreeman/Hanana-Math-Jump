@@ -56,6 +56,10 @@ public class SpawnPrefab : MonoBehaviour
                             .instance.prefabList[randomNumberInRange]
                             .ToString()
                             .Contains("Pink")
+                        || PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
                     )
                     {
                         //                        Debug.Log("Random number contains right: " + randomNumberInRange);
@@ -126,6 +130,10 @@ public class SpawnPrefab : MonoBehaviour
                             .instance.prefabList[randomNumberInRange]
                             .ToString()
                             .Contains("Pink")
+                        || PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
                     )
                     {
                         Debug.Log("Random number contains Left: " + randomNumberInRange);
@@ -196,6 +204,10 @@ public class SpawnPrefab : MonoBehaviour
                             .instance.prefabList[randomNumberInRange]
                             .ToString()
                             .Contains("Pink")
+                        || PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
                     )
                     {
                         Debug.Log("Random number contains Left: " + randomNumberInRange);
@@ -270,6 +282,10 @@ public class SpawnPrefab : MonoBehaviour
                             .instance.prefabList[randomNumberInRange]
                             .ToString()
                             .Contains("Pink")
+                        || PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
                     )
                     {
                         Debug.Log("Random number contains Right: " + randomNumberInRange);
@@ -1246,6 +1262,317 @@ public class SpawnPrefab : MonoBehaviour
                             .instance.prefabList[randomNumberInRange]
                             .ToString()
                             .Contains("Pink")
+                    )
+                    {
+                        Debug.Log("LeftLine");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.identity
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                }
+                else
+                {
+                    Debug.Log("The problem is here: y = " + player.transform.eulerAngles.y);
+                }
+
+                ///// Cyan is here hehe
+                ///
+            }
+            else if (GameController.instance.enterLevel[4])
+            {
+                // 0, 90 ,0 left // staright Quaternion.identity, Quaternion.Euler(0f, -90f, 0f) right
+                //chech which lands that user standing on rn
+                if (
+                    player.LandType.Contains("Straight")
+                    && player.transform.eulerAngles.y >= -10
+                    && player.transform.eulerAngles.y < 80
+                ) // if player facing straight and on land straight
+                {
+                    Debug.Log("Straight");
+                    //then generate Left or straight land
+                    while (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Right")
+                            && PrefabController
+                                .instance.prefabList[randomNumberInRange]
+                                .ToString()
+                                .Contains("RightCyan")
+                        || !PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("Current random number index : " + randomNumberInRange);
+
+                        randomNumberInRange = rnd.Next(
+                            0,
+                            PrefabController.instance.prefabList.Count
+                        ); // Generates random integer values between 1 and how many prefabs of lands left and straight only
+                        Debug.Log("Generate new number: " + randomNumberInRange);
+                    }
+
+                    //spawn left lands and rotate to 90 degress angle
+                    if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("LeftCyan")
+                    )
+                    {
+                        Debug.Log("Standing Straight land and spawn leftLand");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.identity
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                    // if straight keep on straight
+                    else if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Straight")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("Standing Straight land and spawn StraightLand");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.identity
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                }
+                else if (
+                    player.LandType.Contains("Left")
+                    && player.transform.eulerAngles.y >= -10
+                    && player.transform.eulerAngles.y < 80
+                ) // if player facing straight and on left Land
+                {
+                    Debug.Log("Left");
+                    //then generate right or straight land
+                    while (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Left")
+                            && PrefabController
+                                .instance.prefabList[randomNumberInRange]
+                                .ToString()
+                                .Contains("LeftCyan")
+                        || !PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("Random number contains Left: " + randomNumberInRange);
+
+                        randomNumberInRange = rnd.Next(
+                            0,
+                            PrefabController.instance.prefabList.Count
+                        ); // Generates random integer values between 1 and how many prefabs of lands left and straight only
+                        Debug.Log("Generate new number: " + randomNumberInRange);
+                    }
+                    //spawn Right lands and rotate to 90 degress angle
+                    if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Right")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("RightLine");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.Euler(0f, 90f, 0f)
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                    //spawn Straight lands and rotate to 90 degress angle
+                    else if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Straight")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("StraightLine");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.Euler(0f, 90f, 0f)
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                }
+                //90 degress and straight land
+                else if (
+                    player.LandType.Contains("Straight")
+                    && player.transform.eulerAngles.y >= 80
+                    && player.transform.eulerAngles.y < 180
+                )
+                {
+                    Debug.Log("Straight 80");
+                    //then generate right or straight land
+                    while (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Left")
+                            && PrefabController
+                                .instance.prefabList[randomNumberInRange]
+                                .ToString()
+                                .Contains("LeftCyan")
+                        || !PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("Random number contains Left: " + randomNumberInRange);
+
+                        randomNumberInRange = rnd.Next(
+                            0,
+                            PrefabController.instance.prefabList.Count
+                        ); // Generates random integer values between 1 and how many prefabs of lands left and straight only
+                        Debug.Log("Generate new number: " + randomNumberInRange);
+                    }
+                    // if player facing straight and on straight land
+                    if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Straight")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("StraightLine");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.Euler(0f, 90f, 0f)
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                    //spawn Right lands and rotate to 90 degress angle
+                    else if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Right")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("RightLine");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.Euler(0f, 90f, 0f)
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                }
+                // LEFT AND 90 degrees rotation
+
+
+
+
+                else if (
+                    player.LandType.Contains("Right")
+                    && player.transform.eulerAngles.y >= 80
+                    && player.transform.eulerAngles.y < 180
+                )
+                {
+                    Debug.Log("Right 80");
+                    //then generate left or straight land
+                    while (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Right")
+                            && PrefabController
+                                .instance.prefabList[randomNumberInRange]
+                                .ToString()
+                                .Contains("RightCyan")
+                        || !PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("Random number contains Right: " + randomNumberInRange);
+
+                        randomNumberInRange = rnd.Next(
+                            0,
+                            PrefabController.instance.prefabList.Count
+                        ); // Generates random integer values between 1 and how many prefabs of lands left and straight only
+                        Debug.Log("Generate new number: " + randomNumberInRange);
+                    }
+                    // if player facing straight and on straight land
+                    if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Straight")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
+                    )
+                    {
+                        Debug.Log("StraightLine");
+                        Transform t = Instantiate(
+                            PrefabController.instance.prefabList[randomNumberInRange],
+                            transform.parent.Find("spawnPosition").transform.position,
+                            Quaternion.identity
+                        );
+
+                        LandsController.instance.LandsList.Add(t);
+                    }
+                    //spawn left lands and rotate to 90 degress angle
+                    else if (
+                        PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Left")
+                        && PrefabController
+                            .instance.prefabList[randomNumberInRange]
+                            .ToString()
+                            .Contains("Cyan")
                     )
                     {
                         Debug.Log("LeftLine");

@@ -38,7 +38,7 @@ public class TimeRemainingController : MonoBehaviour
                 "00"
             );
 
-            Debug.Log(timeFull + ": TimeFull");
+            //Debug.Log(timeFull + ": TimeFull");
         }
     }
 }

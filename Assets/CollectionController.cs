@@ -43,4 +43,6 @@ public class CollectionController : MonoBehaviour
         textStar.text = stars.ToString();
         textRound.text = rounds.ToString();
     }
+
+
 }
