@@ -24,10 +24,18 @@ public class TimeToAnswer : MonoBehaviour
 
     public void CountTime()
     {
-        maxTime -= Time.unscaledDeltaTime;
-        transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = maxTime.ToString("00");
-        transform.GetChild(0).GetComponent<Image>().fillAmount = maxTime / 10;
+        if (maxTime > 0)
+        {
 
+            maxTime -= Time.unscaledDeltaTime;
+            transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = maxTime.ToString("00");
+            transform.GetChild(0).GetComponent<Image>().fillAmount = maxTime / 10;
+
+        }
+        else
+        {
+            maxTime = 0;
+        }
     }
     // Update is called once per frame
     void Update()
