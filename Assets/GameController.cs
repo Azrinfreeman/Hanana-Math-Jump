@@ -278,7 +278,7 @@ public class GameController : MonoBehaviour
                     if (enterLevel[1] == false)
                     {
                         Debug.Log("change characeter once");
-                        pathController.SetFirstChildToLast();
+                        //  pathController.SetFirstChildToLast();
                         enterLevel[0] = false;
                         enterLevel[1] = true;
                     }
@@ -290,7 +290,7 @@ public class GameController : MonoBehaviour
                     //change character
                     if (enterLevel[2] == false)
                     {
-                        pathController.SetFirstChildToLast();
+                        //   pathController.SetFirstChildToLast();
                         enterLevel[1] = false;
                         enterLevel[2] = true;
                     }
@@ -302,7 +302,7 @@ public class GameController : MonoBehaviour
                     //change character
                     if (enterLevel[3] == false)
                     {
-                        pathController.SetFirstChildToLast();
+                        //   pathController.SetFirstChildToLast();
                         enterLevel[2] = false;
                         enterLevel[3] = true;
                     }
@@ -316,7 +316,7 @@ public class GameController : MonoBehaviour
                     //change character
                     if (enterLevel[4] == false)
                     {
-                        pathController.SetFirstChildToLast();
+                        //   pathController.SetFirstChildToLast();
                         enterLevel[3] = false;
                         enterLevel[4] = true;
                     }
@@ -340,7 +340,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[1] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //  pathController.SetFirstChildToLast();
                             enterLevel[0] = false;
                             enterLevel[1] = true;
                         }
@@ -353,7 +353,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[2] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //   pathController.SetFirstChildToLast();
                             enterLevel[1] = false;
                             enterLevel[2] = true;
                         }
@@ -366,7 +366,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[3] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //  pathController.SetFirstChildToLast();
                             enterLevel[2] = false;
                             enterLevel[3] = true;
                         }
@@ -380,7 +380,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[4] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //  pathController.SetFirstChildToLast();
                             enterLevel[3] = false;
                             enterLevel[4] = true;
                         }
@@ -412,7 +412,7 @@ public class GameController : MonoBehaviour
                         } //change character
                         if (enterLevel[1] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //   pathController.SetFirstChildToLast();
                             enterLevel[0] = false;
                             enterLevel[1] = true;
                         }
@@ -429,7 +429,7 @@ public class GameController : MonoBehaviour
                         } //change character
                         if (enterLevel[2] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //  pathController.SetFirstChildToLast();
                             enterLevel[1] = false;
                             enterLevel[2] = true;
                         }
@@ -446,7 +446,7 @@ public class GameController : MonoBehaviour
                         } //change character
                         if (enterLevel[3] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            // pathController.SetFirstChildToLast();
 
                             enterLevel[2] = false;
                             enterLevel[3] = true;
@@ -465,7 +465,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[4] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //  pathController.SetFirstChildToLast();
                             enterLevel[3] = false;
                             enterLevel[4] = true;
                         }
@@ -783,7 +783,7 @@ public class GameController : MonoBehaviour
                     if (enterLevel[1] == false)
                     {
                         Debug.Log("change characeter once");
-                        pathController.SetFirstChildToLast();
+                        //  pathController.SetFirstChildToLast();
                         enterLevel[0] = false;
                         enterLevel[1] = true;
                     }
@@ -795,7 +795,7 @@ public class GameController : MonoBehaviour
                     //change character
                     if (enterLevel[2] == false)
                     {
-                        pathController.SetFirstChildToLast();
+                        //  pathController.SetFirstChildToLast();
                         enterLevel[1] = false;
                         enterLevel[2] = true;
                     }
@@ -807,7 +807,7 @@ public class GameController : MonoBehaviour
                     //change character
                     if (enterLevel[3] == false)
                     {
-                        pathController.SetFirstChildToLast();
+                        //  pathController.SetFirstChildToLast();
                         enterLevel[2] = false;
                         enterLevel[3] = true;
                     }
@@ -821,7 +821,7 @@ public class GameController : MonoBehaviour
                     //change character
                     if (enterLevel[4] == false)
                     {
-                        pathController.SetFirstChildToLast();
+                        //  pathController.SetFirstChildToLast();
                         enterLevel[3] = false;
                         enterLevel[4] = true;
                     }
@@ -845,7 +845,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[1] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            // pathController.SetFirstChildToLast();
                             enterLevel[0] = false;
                             enterLevel[1] = true;
                         }
@@ -858,7 +858,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[2] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            // pathController.SetFirstChildToLast();
                             enterLevel[1] = false;
                             enterLevel[2] = true;
                         }
@@ -871,7 +871,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[3] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //pathController.SetFirstChildToLast();
                             enterLevel[2] = false;
                             enterLevel[3] = true;
                         }
@@ -885,7 +885,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[4] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //pathController.SetFirstChildToLast();
                             enterLevel[3] = false;
                             enterLevel[4] = true;
                         }
@@ -917,7 +917,7 @@ public class GameController : MonoBehaviour
                         } //change character
                         if (enterLevel[1] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //pathController.SetFirstChildToLast();
                             enterLevel[0] = false;
                             enterLevel[1] = true;
                         }
@@ -934,7 +934,7 @@ public class GameController : MonoBehaviour
                         } //change character
                         if (enterLevel[2] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //pathController.SetFirstChildToLast();
                             enterLevel[1] = false;
                             enterLevel[2] = true;
                         }
@@ -951,7 +951,7 @@ public class GameController : MonoBehaviour
                         } //change character
                         if (enterLevel[3] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //pathController.SetFirstChildToLast();
 
                             enterLevel[2] = false;
                             enterLevel[3] = true;
@@ -970,7 +970,7 @@ public class GameController : MonoBehaviour
                         //change character
                         if (enterLevel[4] == false)
                         {
-                            pathController.SetFirstChildToLast();
+                            //pathController.SetFirstChildToLast();
                             enterLevel[3] = false;
                             enterLevel[4] = true;
                         }
@@ -1345,6 +1345,24 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (PlayerPrefs.GetInt("Character_No_0") == 0)
+        {
+            PlayerPrefs.SetInt("MaxCharacters", PathController.instance.TransformAnimList.Count);
+
+            Debug.Log("true");
+            for (int i = 0; i < PathController.instance.TransformAnimList.Count; i++)
+            {
+                if (i == 0)
+                {
+
+                    PlayerPrefs.SetInt("Character_No_" + PathController.instance.TransformAnimList[i].transform.GetSiblingIndex(), 1);
+
+                }
+                else
+                    PlayerPrefs.SetInt("Character_No_" + PathController.instance.TransformAnimList[i].transform.GetSiblingIndex(), 0);
+            }
+        }
+
         enterLevel = new bool[5];
         enterLevel[0] = true;
         Bg = transform.Find("bg").GetComponent<Transform>();
@@ -1352,7 +1370,7 @@ public class GameController : MonoBehaviour
         moneyTransform = transform.GetChild(1).transform.GetChild(0).GetComponent<Transform>();
         roundTransform = transform.GetChild(1).transform.GetChild(1).GetComponent<Transform>();
         pathController = GameObject.Find("Player").GetComponent<PathController>();
-        levelText = transform.GetChild(4).transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        levelText = transform.Find("Top").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         questionCount = 0;
         //Time.timeScale = 1;
         gameStart = false;

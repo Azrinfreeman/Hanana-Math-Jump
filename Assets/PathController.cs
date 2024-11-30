@@ -6,6 +6,14 @@ using UnityEngine;
 
 public class PathController : MonoBehaviour
 {
+    public static PathController instance;
+    private void Awake()
+    {
+        if (!instance)
+        {
+            instance = this;
+        }
+    }
     [Header("PlayerInformation")]
     public Rigidbody rb;
     public Animator anim;
@@ -48,15 +56,26 @@ public class PathController : MonoBehaviour
         //transform.position = Vector3.MoveTowards(transform.position, Points[pointIndex].transform.position, moveSpeed *Time.deltaTime);
     }
 
-    public void SetFirstChildToLast()
+    void DisableAllCharacter()
     {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).gameObject.SetActive(false);
+        }
+    }
+    public void SetFirstChildToLast(int listNum)
+    {
+        DisableAllCharacter();
+
         //disable first child and set to the very last child
         transform.GetChild(0).gameObject.SetActive(false);
-        transform.GetChild(0).SetAsLastSibling();
-        anim = transform.GetChild(0).GetComponent<Animator>();
+        //transform.GetChild(0).SetAsLastSibling();
 
-        //enable first child
-        transform.GetChild(0).gameObject.SetActive(true);
+
+        //enable selected child
+        transform.GetChild(listNum).gameObject.SetActive(true);
+        //transform.GetChild(listNum).SetAsFirstSibling();
+        anim = transform.GetChild(listNum).GetComponent<Animator>();
     }
 
     IEnumerator delayStartCode()
@@ -79,7 +98,7 @@ public class PathController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            SetFirstChildToLast();
+            //SetFirstChildToLast();
         }
         if (!GameController.instance.gameStart)
         {
@@ -241,6 +260,15 @@ public class PathController : MonoBehaviour
         }
         else
         {
+            int roundCollected = PlayerPrefs.GetInt("RoundsCollected");
+            roundCollected += CollectionController.instance.rounds;
+
+            PlayerPrefs.SetInt("RoundsCollected", roundCollected);
+
+            int starsCollected = PlayerPrefs.GetInt("StarsCollected");
+            starsCollected += CollectionController.instance.stars;
+
+            PlayerPrefs.SetInt("StarsCollected", starsCollected);
             GameController.instance.endMenuScreen.gameObject.SetActive(true);
             GameController.instance.Bg.gameObject.SetActive(true);
             GameController.instance.isQuestionShowUp = true;

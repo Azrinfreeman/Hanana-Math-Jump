@@ -17,11 +17,14 @@ public class CollectionController : MonoBehaviour
     public int rounds;
     public TextMeshProUGUI textRound;
 
+    public int roundsTotal;
     //public int health;
 
     // Start is called before the first frame update
     void Start()
     {
+        stars = PlayerPrefs.GetInt("StarsCollected");
+        roundsTotal = PlayerPrefs.GetInt("RoundsCollected");
         textStar = transform
             .GetChild(0)
             .GetChild(0)
@@ -37,9 +40,13 @@ public class CollectionController : MonoBehaviour
             .GetComponent<TextMeshProUGUI>();
     }
 
+
+
     // Update is called once per frame
     void Update()
     {
+        stars = PlayerPrefs.GetInt("StarsCollected");
+        roundsTotal = PlayerPrefs.GetInt("RoundsCollected");
         textStar.text = stars.ToString();
         textRound.text = rounds.ToString();
     }
