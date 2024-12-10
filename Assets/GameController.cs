@@ -94,17 +94,17 @@ public class GameController : MonoBehaviour
         //collect stars and timer
         if (TimeToAnswer.instance.maxTime > 8 && TimeToAnswer.instance.maxTime < 10)
         {
-            CollectionController.instance.stars += 10;
+            CollectionController.instance.addStars(10);
         }
         else if (TimeToAnswer.instance.maxTime > 4 && TimeToAnswer.instance.maxTime <= 8)
         {
             int t3;
             t3 = (int)TimeToAnswer.instance.maxTime;
-            CollectionController.instance.stars += t3;
+            CollectionController.instance.addStars(t3);
         }
         else if (TimeToAnswer.instance.maxTime > 0 && TimeToAnswer.instance.maxTime <= 4)
         {
-            CollectionController.instance.stars += 3;
+            CollectionController.instance.addStars(3);
         }
 
         moneyTransform.GetComponent<Animator>().Play("collected");
@@ -113,7 +113,7 @@ public class GameController : MonoBehaviour
         moneyTransform.GetComponent<Animator>().Play("afterCollected");
 
         //Collect the round count 
-        CollectionController.instance.rounds++;
+        CollectionController.instance.addRounds(1);
         roundTransform.GetComponent<Animator>().Play("collected");
 
         yield return new WaitForSeconds(0.45f);
@@ -256,6 +256,7 @@ public class GameController : MonoBehaviour
     {
         if (!isQuestionShowUp)
         {
+            SettingBtn.interactable = false;
             pathController.timeToReach.gameObject.SetActive(false);
             Timing.gameObject.SetActive(true);
             operation = rnd2.Next(2);
@@ -1307,6 +1308,7 @@ public class GameController : MonoBehaviour
 
     public void HideQuestion()
     {
+        SettingBtn.interactable = true;
         for (int i = 0; i < 4; i++)
         {
             ansButton[i].onClick.RemoveAllListeners();

@@ -18,13 +18,14 @@ public class CollectionController : MonoBehaviour
     public TextMeshProUGUI textRound;
 
     public int roundsTotal;
+    public int starsTotal;
     //public int health;
 
     // Start is called before the first frame update
     void Start()
     {
-        stars = PlayerPrefs.GetInt("StarsCollected");
-        roundsTotal = PlayerPrefs.GetInt("RoundsCollected");
+        stars = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
+        roundsTotal = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
         textStar = transform
             .GetChild(0)
             .GetChild(0)
@@ -41,14 +42,25 @@ public class CollectionController : MonoBehaviour
     }
 
 
+    public void addStars(int star)
+    {
+        stars += star;
+        PlayerPrefs.SetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), stars);
+    }
+
+    public void addRounds(int round)
+    {
+        roundsTotal += round;
+        PlayerPrefs.SetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), roundsTotal);
+    }
 
     // Update is called once per frame
     void Update()
     {
-        stars = PlayerPrefs.GetInt("StarsCollected");
-        roundsTotal = PlayerPrefs.GetInt("RoundsCollected");
+        stars = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
+        roundsTotal = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
         textStar.text = stars.ToString();
-        textRound.text = rounds.ToString();
+        textRound.text = roundsTotal.ToString();
     }
 
 

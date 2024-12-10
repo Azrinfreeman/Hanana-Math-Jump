@@ -260,15 +260,15 @@ public class PathController : MonoBehaviour
         }
         else
         {
-            int roundCollected = PlayerPrefs.GetInt("RoundsCollected");
+            int roundCollected = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
             roundCollected += CollectionController.instance.rounds;
 
-            PlayerPrefs.SetInt("RoundsCollected", roundCollected);
+            PlayerPrefs.SetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), roundCollected);
 
-            int starsCollected = PlayerPrefs.GetInt("StarsCollected");
+            int starsCollected = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
             starsCollected += CollectionController.instance.stars;
 
-            PlayerPrefs.SetInt("StarsCollected", starsCollected);
+            PlayerPrefs.SetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), starsCollected);
             GameController.instance.endMenuScreen.gameObject.SetActive(true);
             GameController.instance.Bg.gameObject.SetActive(true);
             GameController.instance.isQuestionShowUp = true;

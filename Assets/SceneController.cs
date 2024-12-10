@@ -22,7 +22,15 @@ public class SceneController : MonoBehaviour
         SceneManager.LoadScene("MainGame");
     }
 
-    public void ExitGame(){
+    IEnumerator exitGame(Animator anim)
+    {
+        anim.SetTrigger("onClick");
+        yield return new WaitForSeconds(0.2f);
+
         Application.Quit();
+    }
+    public void ExitGame(Animator anim)
+    {
+        StartCoroutine(exitGame(anim));
     }
 }

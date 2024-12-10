@@ -11,7 +11,9 @@ public class CharacterSelectionController : MonoBehaviour
 
     public int listNum;
     public int coinsNeeded;
+    public int trophyNeeded;
     public TextMeshProUGUI coinsNeededText;
+    public TextMeshProUGUI trophyNeededText;
 
     public Transform ButtonPilih;
 
@@ -26,6 +28,7 @@ public class CharacterSelectionController : MonoBehaviour
         topNameText = transform.GetChild(0).transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         characterImage = transform.GetChild(1).transform.GetChild(0).transform.GetChild(0).GetComponent<Image>();
         coinsNeededText = transform.GetChild(1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        trophyNeededText = transform.GetChild(1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         listNum = 0;
         ButtonPilih = transform.parent.transform.GetChild(1).transform.GetChild(1).transform.GetComponent<Transform>();
         Invoke("ReassignImageandName", 0.3f);
@@ -33,17 +36,20 @@ public class CharacterSelectionController : MonoBehaviour
 
     IEnumerator characterBuying()
     {
-
-        if (PlayerPrefs.GetInt("StarsCollected") >= coinsNeeded)
+        ButtonPilih.GetComponent<Animator>().SetTrigger("onClick");
+        ButtonPilih.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
+        if (PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_")) >= coinsNeeded &&
+         PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_")) >= trophyNeeded)
         {
             //unlock character
             PlayerPrefs.SetInt("Character_No_" + listNum, 1);
 
             //minus the coins from player
-            int sum = PlayerPrefs.GetInt("StarsCollected");
+            int sum = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
             sum -= coinsNeeded;
 
-            PlayerPrefs.SetInt("StarsCollected", sum);
+            PlayerPrefs.SetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), sum);
+
             lockImage.GetComponent<Animator>().Play("lockDisappear");
             yield return new WaitForSeconds(1);
             BeliPrompt.gameObject.SetActive(true);
@@ -73,11 +79,15 @@ public class CharacterSelectionController : MonoBehaviour
         //
         coinsNeeded = PathController.instance.TransformAnimList[listNum].GetComponent<CharacterInfo>().coinsNeeded;
         coinsNeededText.text = coinsNeeded.ToString() + "\nCoins";
-
+        //
+        trophyNeeded = PathController.instance.TransformAnimList[listNum].GetComponent<CharacterInfo>().trophyNeeded;
+        trophyNeededText.text = trophyNeeded.ToString() + "\nTrophy";
 
         if (PlayerPrefs.GetInt("Character_No_" + listNum) == 1)
         {
+
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
+            characterImage.color = new Color32(255, 255, 255, 255);
             ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "PILIH";
             lockImage.gameObject.SetActive(false);
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.AddListener(() => ApplyCharacter());
@@ -86,6 +96,7 @@ public class CharacterSelectionController : MonoBehaviour
         {
 
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
+            characterImage.color = new Color32(90, 90, 90, 255);
             ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "BELI";
             lockImage.gameObject.SetActive(true);
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.AddListener(() => BeliCharacter());
@@ -116,6 +127,7 @@ public class CharacterSelectionController : MonoBehaviour
 
     public void ApplyCharacter()
     {
+        ButtonPilih.GetComponent<Animator>().SetTrigger("onClick");
         PathController.instance.SetFirstChildToLast(listNum);
     }
 

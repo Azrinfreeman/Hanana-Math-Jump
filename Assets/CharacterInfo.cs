@@ -6,6 +6,8 @@ public class CharacterInfo : MonoBehaviour
 {
     public string names;
     public int coinsNeeded;
+
+    public int trophyNeeded;
     // Start is called before the first frame update
     void Start()
     {

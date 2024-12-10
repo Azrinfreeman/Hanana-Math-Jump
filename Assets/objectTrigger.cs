@@ -24,7 +24,7 @@ public class objectTrigger : MonoBehaviour
         GameController.instance.moneyTransform.GetComponent<Animator>().Play("collected");
 
         yield return new WaitForSeconds(0.45f);
-        CollectionController.instance.stars++;
+        CollectionController.instance.addStars(1);
 
         if (!GameObject.Find("collected").GetComponent<AudioSource>().isPlaying)
         {
