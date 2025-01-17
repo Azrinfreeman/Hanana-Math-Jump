@@ -11,10 +11,12 @@ public class CurrentPlayerName : MonoBehaviour
         instance = this;
     }
     public TextMeshProUGUI textname;
+    public TextMeshProUGUI textId;
     // Start is called before the first frame update
     void Start()
     {
-        textname = GetComponent<TextMeshProUGUI>();
+        textname = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        textId = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         ApplyName();
     }
 
@@ -26,5 +28,6 @@ public class CurrentPlayerName : MonoBehaviour
     public void ApplyName()
     {
         textname.text = PlayerPrefs.GetString("CurrentPlayer_");
+        //textId.text = PlayerPrefs.GetString("CurrentPlayerid_");
     }
 }

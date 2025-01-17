@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class TransformController : MonoBehaviour
 {
@@ -29,6 +31,8 @@ public class TransformController : MonoBehaviour
     {
         public string nama;
         public int score;
+
+        public string id_ingame;
     }
 
     [System.Serializable]
@@ -39,13 +43,20 @@ public class TransformController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        children = 0;
+        contentHeight = transform;
+
+
 
     }
 
     // Update is called once per frame
     void Update()
     {
+        children = listClones.Count;
 
+
+        contentHeight.GetComponent<RectTransform>().sizeDelta = new Vector2(1300, 200 * listClones.Count);
     }
 
     private void OnDisable()
@@ -55,7 +66,7 @@ public class TransformController : MonoBehaviour
 
             for (int i = 0; i < listClones.Count; i++)
             {
-                Debug.Log("wr");
+                //                Debug.Log("wr");
                 Destroy(listClones[i].gameObject);
             }
             listClones.Clear();
@@ -66,12 +77,12 @@ public class TransformController : MonoBehaviour
     {
         children = 0;
         contentHeight = transform;
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            children++;
-        }
 
-        contentHeight.GetComponent<RectTransform>().sizeDelta = new Vector2(1300, 250 * children);
+
+        children = listClones.Count;
+
+
+        contentHeight.GetComponent<RectTransform>().sizeDelta = new Vector2(1300, 250 * listClones.Count);
         if (!isRank)
         {
             AddPrefab();
@@ -107,7 +118,7 @@ public class TransformController : MonoBehaviour
             }
             else
             {
-                Debug.Log(www.downloadHandler.text);
+                //     Debug.Log(www.downloadHandler.text);
                 rankings = JsonUtility.FromJson<RankingList>(www.downloadHandler.text);
                 for (int i = 0; i < rankings.ranking.Length; i++)
                 {
@@ -122,13 +133,17 @@ public class TransformController : MonoBehaviour
                 for (int i = 0; i < rankings.ranking.Length; i++)
                 {
                     //name
-                    Debug.Log(l.ToString() + ". ");
+                    //                    Debug.Log(l.ToString() + ". ");
 
 
                     //name
-                    Debug.Log(rankings.ranking[i].nama);
+                    //                  Debug.Log(rankings.ranking[i].nama);
                     //score
-                    Debug.Log(rankings.ranking[i].score.ToString());
+                    //                Debug.Log(rankings.ranking[i].score.ToString());
+                    if (rankings.ranking[i].nama.Equals(PlayerPrefs.GetString("CurrentPlayer_")) && rankings.ranking[i].id_ingame.Equals(PlayerPrefs.GetString("CurrentPlayerid_")))
+                    {
+                        listClones[i].transform.GetChild(0).GetComponent<Image>().color = new Color32(144, 0, 255, 255);
+                    }
                     listClones[i].transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = l.ToString() + ". ";
                     listClones[i].transform.GetChild(0).transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = rankings.ranking[i].nama;
                     listClones[i].transform.GetChild(0).transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = rankings.ranking[i].score.ToString();
@@ -148,13 +163,15 @@ public class TransformController : MonoBehaviour
             content.localPosition = new Vector3(0, 0, 0);
 
             listClones.Add(content);
+
+
         }
     }
     public void ClearChildrenAndDismiss()
     {
         for (int i = 0; i < listClones.Count; i++)
         {
-            Debug.Log("wr");
+            //            Debug.Log("wr");
             Destroy(listClones[i].gameObject);
         }
         listClones.Clear();

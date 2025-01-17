@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class SpawnPrefab : MonoBehaviour
 {
+
     public bool isRightLine;
     public bool isLeftLine;
 
@@ -25,6 +26,7 @@ public class SpawnPrefab : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("Player"))
         {
+            LandsController.instance.RemoveLand();
             System.Random rnd = new System.Random();
             // - > problem dekat sini
             int randomNumberInRange = rnd.Next(0, PrefabController.instance.prefabList.Count); // Generates random integer values between 1 and how many prefabs of lands left and straight only
@@ -1587,11 +1589,12 @@ public class SpawnPrefab : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("The problem is here: y = " + player.transform.eulerAngles.y);
+                    Debug.Log("The problem is here: y = " + player.transform.eulerAngles.y + " asdasd " + player.LandType);
                 }
 
                 ///
             }
+
         }
     }
 

@@ -74,6 +74,7 @@ public class CharacterSelectionController : MonoBehaviour
 
     void ReassignImageandName()
     {
+        ButtonPilih.GetChild(0).GetComponent<Button>().interactable = true;
         topNameText.text = PathController.instance.TransformAnimList[listNum].name;
         characterImage.sprite = CharacterSelection.instance.characters[listNum].GetComponent<Image>().sprite;
         //
@@ -82,6 +83,11 @@ public class CharacterSelectionController : MonoBehaviour
         //
         trophyNeeded = PathController.instance.TransformAnimList[listNum].GetComponent<CharacterInfo>().trophyNeeded;
         trophyNeededText.text = trophyNeeded.ToString() + "\nTrophy";
+
+        if (PlayerPrefs.GetInt("CurrentCharacterNo_") == listNum)
+        {
+            ButtonPilih.GetChild(0).GetComponent<Button>().interactable = false;
+        }
 
         if (PlayerPrefs.GetInt("Character_No_" + listNum) == 1)
         {
@@ -96,7 +102,7 @@ public class CharacterSelectionController : MonoBehaviour
         {
 
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
-            characterImage.color = new Color32(90, 90, 90, 255);
+            characterImage.color = new Color32(190, 190, 190, 255);
             ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "BELI";
             lockImage.gameObject.SetActive(true);
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.AddListener(() => BeliCharacter());
@@ -128,6 +134,8 @@ public class CharacterSelectionController : MonoBehaviour
     public void ApplyCharacter()
     {
         ButtonPilih.GetComponent<Animator>().SetTrigger("onClick");
+        ButtonPilih.GetChild(0).GetComponent<Button>().interactable = false;
+        PlayerPrefs.SetInt("CurrentCharacterNo_", listNum);
         PathController.instance.SetFirstChildToLast(listNum);
     }
 

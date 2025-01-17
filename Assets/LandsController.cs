@@ -7,9 +7,24 @@ public class LandsController : MonoBehaviour
     public static LandsController instance;
 
     public List<Transform> LandsList;
+    public int countland;
+
+    public void RemoveLand()
+    {
+        StartCoroutine(destroyPrevLand());
+    }
+    IEnumerator destroyPrevLand()
+    {
+
+        yield return new WaitForSeconds(16f);
+        LandsList[countland].gameObject.SetActive(false);
+        countland++;
+        //LandsList.RemoveAt(countland);
+    }
 
     void Awake()
     {
+        countland = 0;
         instance = this;
     }
 
@@ -17,5 +32,9 @@ public class LandsController : MonoBehaviour
     void Start() { }
 
     // Update is called once per frame
-    void Update() { }
+    void Update()
+    {
+
+
+    }
 }

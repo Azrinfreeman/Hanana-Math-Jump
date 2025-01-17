@@ -42,17 +42,23 @@ public class PathController : MonoBehaviour
     [Header("Time Remaining Transform")]
     public Transform timeToReach;
 
+    [Header("Particle System")]
+    public Transform wind;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         jump = new Vector3(0.0f, 2.0f, 0.0f);
         anim = transform.GetChild(0).GetComponent<Animator>();
+
+        wind = transform.GetChild(0).transform.GetChild(transform.GetChild(0).childCount - 1).GetComponent<Transform>();
         for (int i = 0; i < transform.childCount; i++)
         {
             TransformAnimList.Add(transform.GetChild(i).GetComponent<Transform>());
         }
         StartCoroutine(delayStartCode());
+        SetFirstChildToLast(PlayerPrefs.GetInt("CurrentCharacterNo_"));
         //transform.position = Vector3.MoveTowards(transform.position, Points[pointIndex].transform.position, moveSpeed *Time.deltaTime);
     }
 
@@ -76,10 +82,13 @@ public class PathController : MonoBehaviour
         transform.GetChild(listNum).gameObject.SetActive(true);
         //transform.GetChild(listNum).SetAsFirstSibling();
         anim = transform.GetChild(listNum).GetComponent<Animator>();
+        wind = transform.GetChild(listNum).transform.GetChild(transform.GetChild(listNum).childCount - 1).GetComponent<Transform>();
+        wind.transform.gameObject.SetActive(false);
     }
 
     IEnumerator delayStartCode()
     {
+        yield return new WaitForSeconds(1f);
         // Debug.Log("Points index : " + PathwayController.instance.pointIndex);
         transform.position = Vector3.MoveTowards(
             transform.position,
@@ -90,6 +99,7 @@ public class PathController : MonoBehaviour
                 .position,
             moveSpeed * Time.deltaTime
         );
+
         yield return null;
     }
 
@@ -104,6 +114,7 @@ public class PathController : MonoBehaviour
         {
             moveSpeed = 0f;
             anim.SetBool("isRunning", false);
+
         }
         else
         {
@@ -116,6 +127,7 @@ public class PathController : MonoBehaviour
             if (!isTripping && moveSpeed > 0f)
             { //running to the points
                 anim.SetBool("isRunning", true);
+
                 transform.position = Vector3.MoveTowards(
                     transform.position,
                     PathwayController
@@ -194,6 +206,8 @@ public class PathController : MonoBehaviour
         //set the tripping animation
         anim.SetBool("isTripping", true);
         anim.SetBool("isRunning", false);
+
+
         //if player looking straight 0angle
         if (transform.eulerAngles.y > -10f && transform.eulerAngles.y < 90)
         {
@@ -226,6 +240,7 @@ public class PathController : MonoBehaviour
         //remove one health if there are any left
         HealthController.instance.getHurt();
 
+
         if (HealthController.instance.healthCount > 0)
         {
             //if health more than 0
@@ -236,6 +251,7 @@ public class PathController : MonoBehaviour
             anim.SetBool("isRunning", true);
             //yield return new WaitForSeconds(1f);
             isTripping = false;
+            wind.transform.gameObject.SetActive(true);
 
             //if quetsioin 80 above then
             if (GameController.instance.questionCount >= 80)
@@ -326,6 +342,7 @@ public class PathController : MonoBehaviour
         if (other.gameObject.tag.Equals("crashTrigger"))
         {
             // Debug.Log("jumpEdge");
+            wind.transform.gameObject.SetActive(false);
             StartCoroutine(startTripping());
             //moveSpeed = 0f;
         }

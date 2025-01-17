@@ -26,18 +26,10 @@ public class CollectionController : MonoBehaviour
     {
         stars = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
         roundsTotal = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
-        textStar = transform
-            .GetChild(0)
-            .GetChild(0)
-            .GetChild(0)
-            .GetChild(0)
+        textStar = GameObject.Find("textStar")
             .GetComponent<TextMeshProUGUI>();
 
-        textRound = transform
-            .GetChild(1)
-            .GetChild(0)
-            .GetChild(0)
-            .GetChild(0)
+        textRound = GameObject.Find("textRound")
             .GetComponent<TextMeshProUGUI>();
     }
 

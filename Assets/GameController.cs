@@ -63,6 +63,9 @@ public class GameController : MonoBehaviour
 
     public EventSystem eventSystem;
 
+    [Header("Optimization")]
+    public List<Transform> itemsToHide;
+
     IEnumerator collectedRound()
     {
         //disable the trigger for tripping
@@ -1347,10 +1350,9 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        PlayerPrefs.SetInt("MaxCharacters", PathController.instance.TransformAnimList.Count);
         if (PlayerPrefs.GetInt("Character_No_0") == 0)
         {
-            PlayerPrefs.SetInt("MaxCharacters", PathController.instance.TransformAnimList.Count);
-
             Debug.Log("true");
             for (int i = 0; i < PathController.instance.TransformAnimList.Count; i++)
             {
@@ -1437,7 +1439,10 @@ public class GameController : MonoBehaviour
         eventSystem.enabled = false;
         yield return new WaitForSeconds(2.3f);
         eventSystem.enabled = true;
-
+        for (int i = 0; i < itemsToHide.Count; i++)
+        {
+            itemsToHide[i].gameObject.SetActive(false);
+        }
         gameStart = true;
 
         if (!music[1].isPlaying)
@@ -1449,5 +1454,6 @@ public class GameController : MonoBehaviour
         FreeLookCamera.gameObject.SetActive(true);
         CameraAnim.enabled = false;
         SettingBtn.interactable = true;
+        PathController.instance.wind.transform.gameObject.SetActive(true);
     }
 }
