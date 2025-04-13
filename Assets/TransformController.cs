@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class TransformController : MonoBehaviour
 {
     public static TransformController instance;
-
+    public List<string> userCollection;
     public Transform childrenContentPrefab;
 
     private void Awake()
@@ -178,18 +178,40 @@ public class TransformController : MonoBehaviour
 
     public void AddPrefab()
     {
-        for (int i = 0; i < PlayerPrefs.GetInt("PlayerTotal"); i++)
+        userCollection.Clear();
+        for (int i = 0; i < 20; i++)
         {
-            Transform content = Instantiate(
-                childrenContentPrefab,
-                new Vector3(0, 0, 0),
-                Quaternion.identity
-            );
-            content.SetParent(transform);
-            content.localScale = new Vector3(1, 1, 1);
-            content.localPosition = new Vector3(0, 0, 0);
+            //Debug.Log(i);
+            //Debug.Log(PlayerPrefs.GetString("Player_" + i));
 
-            listClones.Add(content);
+            string str = PlayerPrefs.GetString("Player_" + i);
+            if (string.IsNullOrEmpty(str) == true)
+            {
+                // Debug.Log("null");
+            }
+            else
+            {
+                //  Debug.Log("addedd");
+                //  Debug.Log(i);
+
+                userCollection.Add("Player_" + i);
+                //if not empty add to content
+                Transform content = Instantiate(
+                    childrenContentPrefab,
+                    new Vector3(0, 0, 0),
+                    Quaternion.identity
+                );
+                content.SetParent(transform);
+                content.localScale = new Vector3(1, 1, 1);
+                content.localPosition = new Vector3(0, 0, 0);
+                int l = i + 1;
+                content
+                    .transform.GetChild(0)
+                    .transform.GetChild(0)
+                    .GetComponent<TextMeshProUGUI>()
+                    .text = userCollection.Count.ToString();
+                listClones.Add(content);
+            }
         }
     }
 
