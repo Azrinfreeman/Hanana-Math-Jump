@@ -94699,7 +94699,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.00079345703}
   m_SizeDelta: {x: 1299.4, y: 250}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1547883366
@@ -94778,6 +94778,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c072ca50aa9a4e44e9832ad00efa3fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  userCollection: []
   childrenContentPrefab: {fileID: 3746025879940801167, guid: 278fdd4f69b91964c9ed50638ad587b8,
     type: 3}
   contentHeight: {fileID: 0}
@@ -97760,7 +97761,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 75613022}
   m_HandleRect: {fileID: 75613021}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -130357,6 +130358,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c072ca50aa9a4e44e9832ad00efa3fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  userCollection: []
   childrenContentPrefab: {fileID: 9193118130763091574, guid: 3fda99ee462aa034bb59a9ce27bb1efe,
     type: 3}
   contentHeight: {fileID: 0}
@@ -131863,6 +131865,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c072ca50aa9a4e44e9832ad00efa3fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  userCollection: []
   childrenContentPrefab: {fileID: 9193118130763091574, guid: 3fda99ee462aa034bb59a9ce27bb1efe,
     type: 3}
   contentHeight: {fileID: 0}
