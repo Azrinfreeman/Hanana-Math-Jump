@@ -7,13 +7,14 @@ using UnityEngine.UI;
 
 public class TransformController : MonoBehaviour
 {
-    public static TransformController instance;
+    //  public static TransformController instance;
     public List<string> userCollection;
+    public List<string> userIdCollection;
     public Transform childrenContentPrefab;
 
     private void Awake()
     {
-        instance = this;
+        // instance = this;
     }
 
     public Transform contentHeight;
@@ -101,10 +102,12 @@ public class TransformController : MonoBehaviour
 
     IEnumerator fetchRanking()
     {
-        Debug.Log("fetchRanking");
+        userIdCollection.Clear();
+        userCollection.Clear();
+        //Debug.Log("fetchRanking");
         using (
             UnityWebRequest www = UnityWebRequest.Get(
-                "https://hananaelearning.com/funmath/fetchRanking.php"
+                "https://app-hanana.com/funmath/fetchRanking.php"
             )
         )
         {
@@ -119,8 +122,10 @@ public class TransformController : MonoBehaviour
             }
             else
             {
-                //     Debug.Log(www.downloadHandler.text);
+                //name in server head json must be ranking
+                //Debug.Log(www.downloadHandler.text);
                 rankings = JsonUtility.FromJson<RankingList>(www.downloadHandler.text);
+                //Debug.Log(rankings.ranking);
                 for (int i = 0; i < rankings.ranking.Length; i++)
                 {
                     Transform content = Instantiate(
@@ -142,7 +147,7 @@ public class TransformController : MonoBehaviour
 
 
                     //name
-                    //                  Debug.Log(rankings.ranking[i].nama);
+                    //Debug.Log(rankings.ranking[i].nama);
                     //score
                     //                Debug.Log(rankings.ranking[i].score.ToString());
                     if (
@@ -178,6 +183,7 @@ public class TransformController : MonoBehaviour
 
     public void AddPrefab()
     {
+        userIdCollection.Clear();
         userCollection.Clear();
         for (int i = 0; i < 20; i++)
         {
@@ -195,6 +201,7 @@ public class TransformController : MonoBehaviour
                 //  Debug.Log(i);
 
                 userCollection.Add("Player_" + i);
+                userIdCollection.Add("Playerid_" + i);
                 //if not empty add to content
                 Transform content = Instantiate(
                     childrenContentPrefab,

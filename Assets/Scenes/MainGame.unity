@@ -52671,6 +52671,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75c92d9fb5fa8d8449bd7a9bc0f7f863, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  transformController: {fileID: 0}
   text: {fileID: 0}
   btnConfirm: {fileID: 0}
 --- !u!1 &807564770
@@ -94779,6 +94780,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   userCollection: []
+  userIdCollection: []
   childrenContentPrefab: {fileID: 3746025879940801167, guid: 278fdd4f69b91964c9ed50638ad587b8,
     type: 3}
   contentHeight: {fileID: 0}
@@ -130359,6 +130361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   userCollection: []
+  userIdCollection: []
   childrenContentPrefab: {fileID: 9193118130763091574, guid: 3fda99ee462aa034bb59a9ce27bb1efe,
     type: 3}
   contentHeight: {fileID: 0}
@@ -131866,6 +131869,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   userCollection: []
+  userIdCollection: []
   childrenContentPrefab: {fileID: 9193118130763091574, guid: 3fda99ee462aa034bb59a9ce27bb1efe,
     type: 3}
   contentHeight: {fileID: 0}

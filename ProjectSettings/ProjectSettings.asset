@@ -144,7 +144,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 1.2.4
+  bundleVersion: 1.2.5
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -166,7 +166,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.HananaAcademySdnBhd.FunMathHananaBeta
+    Android: com.HananaAcademySdnBhd.FunMathHanana
     Standalone: com.HananaAcademySdnBhd.FunMathHananaBeta
     iPhone: com.Unity-Technologies.com.unity.template.urp-blank
   buildNumber:
@@ -940,4 +940,4 @@ PlayerSettings:
   hmiLoadingImage: {fileID: 0}
   platformRequiresReadableAssets: 0
   virtualTexturingSupportEnabled: 0
-  insecureHttpOption: 0
+  insecureHttpOption: 2
