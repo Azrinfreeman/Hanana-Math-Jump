@@ -7,6 +7,7 @@ using UnityEngine;
 public class PathController : MonoBehaviour
 {
     public static PathController instance;
+
     private void Awake()
     {
         if (!instance)
@@ -14,6 +15,7 @@ public class PathController : MonoBehaviour
             instance = this;
         }
     }
+
     [Header("PlayerInformation")]
     public Rigidbody rb;
     public Animator anim;
@@ -52,7 +54,10 @@ public class PathController : MonoBehaviour
         jump = new Vector3(0.0f, 2.0f, 0.0f);
         anim = transform.GetChild(0).GetComponent<Animator>();
 
-        wind = transform.GetChild(0).transform.GetChild(transform.GetChild(0).childCount - 1).GetComponent<Transform>();
+        wind = transform
+            .GetChild(0)
+            .transform.GetChild(transform.GetChild(0).childCount - 1)
+            .GetComponent<Transform>();
         for (int i = 0; i < transform.childCount; i++)
         {
             TransformAnimList.Add(transform.GetChild(i).GetComponent<Transform>());
@@ -69,6 +74,7 @@ public class PathController : MonoBehaviour
             transform.GetChild(i).gameObject.SetActive(false);
         }
     }
+
     public void SetFirstChildToLast(int listNum)
     {
         DisableAllCharacter();
@@ -82,7 +88,10 @@ public class PathController : MonoBehaviour
         transform.GetChild(listNum).gameObject.SetActive(true);
         //transform.GetChild(listNum).SetAsFirstSibling();
         anim = transform.GetChild(listNum).GetComponent<Animator>();
-        wind = transform.GetChild(listNum).transform.GetChild(transform.GetChild(listNum).childCount - 1).GetComponent<Transform>();
+        wind = transform
+            .GetChild(listNum)
+            .transform.GetChild(transform.GetChild(listNum).childCount - 1)
+            .GetComponent<Transform>();
         wind.transform.gameObject.SetActive(false);
     }
 
@@ -114,7 +123,6 @@ public class PathController : MonoBehaviour
         {
             moveSpeed = 0f;
             anim.SetBool("isRunning", false);
-
         }
         else
         {
@@ -207,7 +215,6 @@ public class PathController : MonoBehaviour
         anim.SetBool("isTripping", true);
         anim.SetBool("isRunning", false);
 
-
         //if player looking straight 0angle
         if (transform.eulerAngles.y > -10f && transform.eulerAngles.y < 90)
         {
@@ -239,7 +246,6 @@ public class PathController : MonoBehaviour
 
         //remove one health if there are any left
         HealthController.instance.getHurt();
-
 
         if (HealthController.instance.healthCount > 0)
         {
@@ -275,7 +281,7 @@ public class PathController : MonoBehaviour
             }
         }
         else
-        {
+        { /*
             int roundCollected = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
             roundCollected += CollectionController.instance.rounds;
 
@@ -285,6 +291,7 @@ public class PathController : MonoBehaviour
             starsCollected += CollectionController.instance.stars;
 
             PlayerPrefs.SetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), starsCollected);
+            */
             GameController.instance.endMenuScreen.gameObject.SetActive(true);
             GameController.instance.Bg.gameObject.SetActive(true);
             GameController.instance.isQuestionShowUp = true;
