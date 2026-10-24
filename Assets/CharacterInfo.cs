@@ -8,15 +8,5 @@ public class CharacterInfo : MonoBehaviour
     public int coinsNeeded;
 
     public int trophyNeeded;
-    // Start is called before the first frame update
-    void Start()
-    {
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

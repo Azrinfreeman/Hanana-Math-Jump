@@ -20,14 +20,9 @@ public class CurrentPlayerName : MonoBehaviour
         ApplyName();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
     public void ApplyName()
     {
-        textname.text = PlayerPrefs.GetString("CurrentPlayer_");
+        textname.text = TextUtil.Printable(textname, PlayerPrefs.GetString("CurrentPlayer_"));
         //textId.text = PlayerPrefs.GetString("CurrentPlayerid_");
     }
 }

@@ -38,9 +38,8 @@ public class PlayerResetController : MonoBehaviour
     void PlayerDetails()
     {
         text.text = "RESET DATA FOR " + PlayerPrefs.GetString("CurrentPlayer_").ToString();
+        btnConfirm.onClick.RemoveAllListeners();
         btnConfirm.onClick.AddListener(ResetData);
     }
 
-    // Update is called once per frame
-    void Update() { }
 }

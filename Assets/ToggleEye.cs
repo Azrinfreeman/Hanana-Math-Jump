@@ -33,9 +33,4 @@ public class ToggleEye : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

@@ -27,10 +27,23 @@ public class HealthController : MonoBehaviour
 
     public void getHurt()
     {
-        Healths[healthCount - 1].gameObject.SetActive(false);
+        if (healthCount <= 0)
+            return;
+        StartCoroutine(PopOut(Healths[healthCount - 1]));
         healthCount--;
     }
 
-    // Update is called once per frame
-    void Update() { }
+    IEnumerator PopOut(Transform heart)
+    {
+        const float duration = 0.4f;
+        for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
+        {
+            float k = t / duration;
+            heart.localScale = Vector3.one * (k < 0.3f ? 1f + k : Mathf.Lerp(1.3f, 0f, (k - 0.3f) / 0.7f));
+            yield return null;
+        }
+        heart.gameObject.SetActive(false);
+        heart.localScale = Vector3.one;
+    }
+
 }

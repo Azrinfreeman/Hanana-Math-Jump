@@ -1,27 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ButtonHandling : MonoBehaviour
 {
+    Button button;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-
+        button = GetComponent<Button>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (GameController.instance.gameStart)
+        bool interactable = !GameController.instance.gameStart;
+        if (button.interactable != interactable)
         {
-            transform.GetComponent<Button>().interactable = false;
-        }
-        else
-        {
-            transform.GetComponent<Button>().interactable = true;
+            button.interactable = interactable;
         }
     }
 }

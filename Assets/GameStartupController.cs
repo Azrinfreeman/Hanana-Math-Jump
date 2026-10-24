@@ -31,8 +31,6 @@ public class GameStartupController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update() { }
 
     IEnumerator InsertScoreToDB()
     {
@@ -58,17 +56,12 @@ public class GameStartupController : MonoBehaviour
             );
 
             using (
-                UnityWebRequest www = UnityWebRequest.Post(
-                    "https://app-hanana.com/funmath/insertmark.php",
-                    form
-                )
+                UnityWebRequest www = UnityWebRequest.Post(ServerApi.InsertMark, form)
             )
             {
+                www.timeout = ServerApi.TimeoutSeconds;
                 yield return www.SendWebRequest();
-                if (
-                    www.result == UnityWebRequest.Result.ConnectionError
-                    || www.result == UnityWebRequest.Result.ProtocolError
-                )
+                if (www.result != UnityWebRequest.Result.Success)
                 {
                     Debug.Log(www.error);
                     // Debug.Log("error server");
@@ -102,46 +95,29 @@ public class GameStartupController : MonoBehaviour
         StartCoroutine(InsertScoreToDB());
     }
 
-    public void SaveNewPlayerName(string name, string id)
+    public const int MaxPlayers = 20;
+
+    // Stores the player in the first free slot and returns the slot index (-1 when full).
+    public int SaveNewPlayerName(string name, string id)
     {
-        if (PlayerPrefs.GetInt("PlayerTotal") == 0)
+        for (int a = 0; a < MaxPlayers; a++)
         {
-            PlayerPrefs.SetString("Player_0", name);
-            PlayerPrefs.SetString("Playerid_0", id);
-            PlayerPrefs.SetInt("PlayerTotal", PlayerPrefs.GetInt("PlayerTotal") + 1);
-        }
-        else if (PlayerPrefs.GetInt("PlayerTotal") > 0)
-        {
-            string str = PlayerPrefs.GetString("Player_" + PlayerPrefs.GetInt("PlayerTotal"));
-
-            if (string.IsNullOrEmpty(str) == true)
+            if (string.IsNullOrEmpty(PlayerPrefs.GetString("Player_" + a)))
             {
-                Debug.Log("empty");
-                PlayerPrefs.SetString("Player_" + PlayerPrefs.GetInt("PlayerTotal"), name);
-                PlayerPrefs.SetString("Playerid_" + PlayerPrefs.GetInt("PlayerTotal"), id);
+                PlayerPrefs.SetString("Player_" + a, name);
+                PlayerPrefs.SetString("Playerid_" + a, id);
                 PlayerPrefs.SetInt("PlayerTotal", PlayerPrefs.GetInt("PlayerTotal") + 1);
-            }
-            else
-            {
-                int newPlayerTotal = PlayerPrefs.GetInt("PlayerTotal") + 1;
-                string str2 = PlayerPrefs.GetString("Player_" + 0);
-                int a = 0;
-                while (a < 100)
-                {
-                    str2 = PlayerPrefs.GetString("Player_" + a);
-                    if (string.IsNullOrEmpty(str2))
-                    {
-                        Debug.Log("existing player");
-                        PlayerPrefs.SetString("Player_" + a, name);
-                        PlayerPrefs.SetString("Playerid_" + a, id);
-                        PlayerPrefs.SetInt("PlayerTotal", PlayerPrefs.GetInt("PlayerTotal") + 1);
-                        a = 101;
-                    }
-                    a++;
-                }
-
+                return a;
             }
         }
+        return -1;
+    }
+
+    // "Player_12" -> 12
+    public static int SlotFromKey(string key)
+    {
+        int.TryParse(key.Substring(key.LastIndexOf('_') + 1), out int slot);
+        return slot;
     }
 
     public string returnPlayerName()
@@ -149,10 +125,10 @@ public class GameStartupController : MonoBehaviour
         return PlayerPrefs.GetString("Player_");
     }
 
-    public void SetAsCurrentPlayer(string name, string id)
+    public void SetAsCurrentPlayer(string name, string id, int slot)
     {
         PlayerPrefs.SetString("CurrentPlayer_", name);
         PlayerPrefs.SetString("CurrentPlayerid_", id);
-        PlayerPrefs.SetInt("CurrentPlayerNo_", PlayerPrefs.GetInt("PlayerTotal") - 1);
+        PlayerPrefs.SetInt("CurrentPlayerNo_", slot);
     }
 }

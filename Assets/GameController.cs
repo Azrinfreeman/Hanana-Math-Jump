@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using FunMath;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -66,6 +68,30 @@ public class GameController : MonoBehaviour
     [Header("Optimization")]
     public List<Transform> itemsToHide;
 
+    int lastStars;
+
+    void AwardStars()
+    {
+        float t = TimeToAnswer.instance.maxTime;
+        lastStars = 0;
+        if (t > 8 && t < 10)
+        {
+            lastStars = 10;
+        }
+        else if (t > 4 && t <= 8)
+        {
+            lastStars = (int)t;
+        }
+        else if (t > 0 && t <= 4)
+        {
+            lastStars = 3;
+        }
+        if (lastStars > 0)
+        {
+            CollectionController.instance.addStars(lastStars);
+        }
+    }
+
     IEnumerator collectedRound()
     {
         //disable the trigger for tripping
@@ -94,25 +120,11 @@ public class GameController : MonoBehaviour
                 .enabled = false;
         }
 
-        //collect stars and timer
-        if (TimeToAnswer.instance.maxTime > 8 && TimeToAnswer.instance.maxTime < 10)
-        {
-            CollectionController.instance.addStars(10);
-        }
-        else if (TimeToAnswer.instance.maxTime > 4 && TimeToAnswer.instance.maxTime <= 8)
-        {
-            int t3;
-            t3 = (int)TimeToAnswer.instance.maxTime;
-            CollectionController.instance.addStars(t3);
-        }
-        else if (TimeToAnswer.instance.maxTime > 0 && TimeToAnswer.instance.maxTime <= 4)
-        {
-            CollectionController.instance.addStars(3);
-        }
+        AwardStars();
 
         moneyTransform.GetComponent<Animator>().Play("collected");
         yield return new WaitForSeconds(0.45f);
-        GameObject.Find("collected").GetComponent<AudioSource>().Play();
+        Sfx.Play("collected");
         moneyTransform.GetComponent<Animator>().Play("afterCollected");
 
         //Collect the round count 
@@ -121,10 +133,7 @@ public class GameController : MonoBehaviour
 
         yield return new WaitForSeconds(0.45f);
         //play sound
-        if (!GameObject.Find("collected").GetComponent<AudioSource>().isPlaying)
-        {
-            GameObject.Find("collected").GetComponent<AudioSource>().Play();
-        }
+        Sfx.PlayIfIdle("collected");
         yield return new WaitForSeconds(0.25f);
         roundTransform.GetComponent<Animator>().Play("afterCollected");
         //Destroy(gameObject);
@@ -132,6 +141,8 @@ public class GameController : MonoBehaviour
 
     IEnumerator collectedRound80()
     {
+        AwardStars();
+        Timing.gameObject.SetActive(false);
         HideQuestionsButtons();
         pathController.timeToReach.gameObject.SetActive(false);
         yield return new WaitForSeconds(1f);
@@ -196,8 +207,10 @@ public class GameController : MonoBehaviour
 
     IEnumerator incorrectAnswer()
     {
-        Debug.Log("Incorrect");
-        HideQuestionsButtons();
+        if (!questionIsPaused)
+        {
+            HideQuestionsButtons();
+        }
         //disable the trigger for jumping and code into PathController crash Trigger
         if (pathController.isTriggerJump)
         {
@@ -232,28 +245,44 @@ public class GameController : MonoBehaviour
 
     public void buttonFunction()
     {
+        if (answering)
+            return;
+        answering = true;
+        CountAnswer(false);
         StartCoroutine(incorrectAnswer());
-        HideQuestion();
+        Time.timeScale = 0; // stay paused while the result is shown
+        StartCoroutine(Feedback(false, HideQuestion));
     }
 
     public void CorrectButtonFunction()
     {
+        if (answering)
+            return;
+        answering = true;
+        CountAnswer(true);
         StartCoroutine(collectedRound());
-        HideQuestion();
+        StartCoroutine(StarPopup(lastStars));
+        StartCoroutine(Feedback(true, HideQuestion));
     }
 
     public void buttonFunction80()
     {
+        CountAnswer(false);
         StartCoroutine(incorrectAnswer());
+        Timing.gameObject.SetActive(false);
         //HideQuestion80();
     }
 
     public void CorrectButtonFunction80()
     {
-        Debug.Log("correctbuttonfunctioin");
+        CountAnswer(true);
         StartCoroutine(collectedRound80());
+        StartCoroutine(StarPopup(lastStars));
         //HideQuestion80();
     }
+
+    // true when the current question froze the game (before question 80)
+    bool questionIsPaused;
 
     public void ShowQuestion()
     {
@@ -262,503 +291,9 @@ public class GameController : MonoBehaviour
             SettingBtn.interactable = false;
             pathController.timeToReach.gameObject.SetActive(false);
             Timing.gameObject.SetActive(true);
-            operation = rnd2.Next(2);
-            //if else level
-            if (level == 1)
-            {
-                //questionCount based question
-
-                if (questionCount >= 0 && questionCount <= 20)
-                { //answer not more than 10
-                    firstNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                    secNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                }
-                else if (questionCount > 20 && questionCount <= 40)
-                {
-                    firstNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-                    secNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-                    // pathController.SetFirstChildToLast();
-                    //change character
-                    if (enterLevel[1] == false)
-                    {
-                        Debug.Log("change characeter once");
-                        //  pathController.SetFirstChildToLast();
-                        enterLevel[0] = false;
-                        enterLevel[1] = true;
-                    }
-                }
-                else if (questionCount > 40 && questionCount <= 60)
-                {
-                    firstNum = rnd.Next(11, 16); // Generates random integer values between 10 and 15
-                    secNum = rnd.Next(10, 16); // Generates random integer values between 10 and 15
-                    //change character
-                    if (enterLevel[2] == false)
-                    {
-                        //   pathController.SetFirstChildToLast();
-                        enterLevel[1] = false;
-                        enterLevel[2] = true;
-                    }
-                }
-                else if (questionCount > 60 && questionCount <= 80)
-                {
-                    firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    //change character
-                    if (enterLevel[3] == false)
-                    {
-                        //   pathController.SetFirstChildToLast();
-                        enterLevel[2] = false;
-                        enterLevel[3] = true;
-                    }
-                }
-                else if (questionCount > 80)
-                {
-                    Debug.Log("more than 80");
-                    firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-
-                    //change character
-                    if (enterLevel[4] == false)
-                    {
-                        //   pathController.SetFirstChildToLast();
-                        enterLevel[3] = false;
-                        enterLevel[4] = true;
-                    }
-                }
-                answers = firstNum + secNum;
-            }
-            else if (level == 2)
-            {
-                if (operation == 0)
-                { //plus operation
-                    if (questionCount >= 0 && questionCount <= 20)
-                    { //answer not more than 5
-                        firstNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                        secNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                    }
-                    else if (questionCount > 20 && questionCount <= 40)
-                    {
-                        firstNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-                        secNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-
-                        //change character
-                        if (enterLevel[1] == false)
-                        {
-                            //  pathController.SetFirstChildToLast();
-                            enterLevel[0] = false;
-                            enterLevel[1] = true;
-                        }
-                    }
-                    else if (questionCount > 40 && questionCount <= 60)
-                    {
-                        firstNum = rnd.Next(11, 16); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(11, 16); // Generates random integer values between 10 and 15
-
-                        //change character
-                        if (enterLevel[2] == false)
-                        {
-                            //   pathController.SetFirstChildToLast();
-                            enterLevel[1] = false;
-                            enterLevel[2] = true;
-                        }
-                    }
-                    else if (questionCount > 60 && questionCount <= 80)
-                    {
-                        firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-
-                        //change character
-                        if (enterLevel[3] == false)
-                        {
-                            //  pathController.SetFirstChildToLast();
-                            enterLevel[2] = false;
-                            enterLevel[3] = true;
-                        }
-                    }
-                    else if (questionCount > 80)
-                    {
-                        Debug.Log("more than 80");
-                        firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-
-                        //change character
-                        if (enterLevel[4] == false)
-                        {
-                            //  pathController.SetFirstChildToLast();
-                            enterLevel[3] = false;
-                            enterLevel[4] = true;
-                        }
-                    }
-                    answers = firstNum + secNum;
-                }
-                else if (operation == 1)
-                { // minus operation
-                    Debug.Log("minus operation");
-                    if (questionCount >= 0 && questionCount <= 20)
-                    { //answer not more than 10
-                        firstNum = rnd.Next(0, 11); // Generates random integer values between 1 and 10
-                        secNum = rnd.Next(0, 11); // Generates random integer values between 1 and 10
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 11);
-                            firstNum = rnd.Next(0, 11);
-                        }
-                    }
-                    else if (questionCount > 20 && questionCount <= 40)
-                    {
-                        //answer not more than 20
-                        firstNum = rnd.Next(0, 21); // Generates random integer values between 1 and 10
-                        secNum = rnd.Next(0, 21); // Generates random integer values between 1 and 10
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 21);
-                            firstNum = rnd.Next(0, 21);
-                        } //change character
-                        if (enterLevel[1] == false)
-                        {
-                            //   pathController.SetFirstChildToLast();
-                            enterLevel[0] = false;
-                            enterLevel[1] = true;
-                        }
-                    }
-                    else if (questionCount > 40 && questionCount <= 60)
-                    {
-                        //answer not more than 30
-                        firstNum = rnd.Next(0, 31); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(0, 31); // Generates random integer values between 10 and 15
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 31);
-                            firstNum = rnd.Next(0, 31);
-                        } //change character
-                        if (enterLevel[2] == false)
-                        {
-                            //  pathController.SetFirstChildToLast();
-                            enterLevel[1] = false;
-                            enterLevel[2] = true;
-                        }
-                    }
-                    else if (questionCount > 60 && questionCount <= 80)
-                    {
-                        //answer not more than 10
-                        firstNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 41);
-                            firstNum = rnd.Next(0, 41);
-                        } //change character
-                        if (enterLevel[3] == false)
-                        {
-                            // pathController.SetFirstChildToLast();
-
-                            enterLevel[2] = false;
-                            enterLevel[3] = true;
-                        }
-                    }
-                    else if (questionCount > 80)
-                    {
-                        Debug.Log("more than 80");
-                        firstNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 41);
-                            firstNum = rnd.Next(0, 41);
-                        }
-                        //change character
-                        if (enterLevel[4] == false)
-                        {
-                            //  pathController.SetFirstChildToLast();
-                            enterLevel[3] = false;
-                            enterLevel[4] = true;
-                        }
-                    }
-                    answers = secNum - firstNum;
-                }
-            }
-
-            //asign to question gameobject
-            if (level == 1)
-            {
-                transform
-                    .GetChild(3)
-                    .transform.GetChild(0)
-                    .transform.GetChild(0)
-                    .GetComponent<TextMeshProUGUI>()
-                    .text = firstNum + " + " + secNum + " ";
-
-                questions = firstNum + " + " + secNum + " ";
-            }
-            else if (level == 2)
-            {
-                if (operation == 0)
-                {
-                    transform
-                        .GetChild(3)
-                        .transform.GetChild(0)
-                        .transform.GetChild(0)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = firstNum + " + " + secNum + " ";
-
-                    questions = firstNum + " + " + secNum + " ";
-                }
-                else if (operation == 1)
-                {
-                    transform
-                        .GetChild(3)
-                        .transform.GetChild(0)
-                        .transform.GetChild(0)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = secNum + " - " + firstNum + " ";
-
-                    questions = secNum + " - " + firstNum + " ";
-                }
-            }
-            //assign buttons in gameobject
-
-            ansButton[0] = transform
-                .GetChild(3)
-                .transform.GetChild(1)
-                .transform.GetChild(0)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-            ansButton[1] = transform
-                .GetChild(3)
-                .transform.GetChild(1)
-                .transform.GetChild(1)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-            ansButton[2] = transform
-                .GetChild(3)
-                .transform.GetChild(2)
-                .transform.GetChild(0)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-            ansButton[3] = transform
-                .GetChild(3)
-                .transform.GetChild(2)
-                .transform.GetChild(1)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-
-            //assign random answer to random buttons
-            if (level == 1)
-            { //if level 1 only show two answer buttons
-                ansButton[2].gameObject.SetActive(false);
-                ansButton[3].gameObject.SetActive(false);
-                //choose which button to put answer
-                int buttonNum = rnd.Next(2);
-                ansButton[buttonNum].onClick.AddListener(() => CorrectButtonFunction());
-                ansButton[buttonNum]
-                    .transform.GetChild(0)
-                    .transform.GetChild(0)
-                    .GetComponent<TextMeshProUGUI>()
-                    .text = answers.ToString();
-                for (int i = 0; i < 2; i++)
-                {
-                    if (i != buttonNum)
-                    {
-                        if (questionCount >= 0 && questionCount <= 20) // not more than 10
-                        {
-                            randomAnswer = rnd.Next(2, 11);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(2, 11);
-                            }
-                            //                            Debug.Log("answer not more than 10 ");
-                        }
-                        else if (questionCount > 20 && questionCount <= 40) // not more than 20
-                        {
-                            randomAnswer = rnd.Next(11, 21);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(10, 21);
-                            }
-                            Debug.Log("answer not more than 20 ");
-                        }
-                        else if (questionCount > 40 && questionCount <= 60) // not more than 30
-                        {
-                            randomAnswer = rnd.Next(21, 31);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(21, 31);
-                            }
-                            Debug.Log("answer not more than 30 ");
-                        }
-                        else if (questionCount > 60 && questionCount <= 80) // not more than 40
-                        {
-                            randomAnswer = rnd.Next(31, 41);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                            }
-                            //                            Debug.Log("answer not more than 40 ");
-                        }
-                        else if (questionCount > 80)
-                        {
-                            randomAnswer = rnd.Next(31, 41);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                            }
-                            Debug.Log("answer not more than 80 ");
-                        }
-
-                        ansButton[i].onClick.AddListener(() => buttonFunction());
-                        ansButton[i]
-                            .transform.GetChild(0)
-                            .transform.GetChild(0)
-                            .GetComponent<TextMeshProUGUI>()
-                            .text = randomAnswer.ToString();
-                    }
-                }
-            }
-            else if (level == 2)
-            {
-                //only two answer buttons
-                ansButton[2].gameObject.SetActive(false);
-                ansButton[3].gameObject.SetActive(false);
-                //choose which button to put answer
-                int buttonNum = rnd.Next(2);
-                ansButton[buttonNum].onClick.AddListener(() => CorrectButtonFunction());
-                ansButton[buttonNum]
-                    .transform.GetChild(0)
-                    .transform.GetChild(0)
-                    .GetComponent<TextMeshProUGUI>()
-                    .text = answers.ToString();
-                for (int i = 0; i < 2; i++)
-                {
-                    if (operation == 0)
-                    {
-                        if (i != buttonNum)
-                        {
-                            if (questionCount >= 0 && questionCount <= 20) // not more than 10
-                            {
-                                randomAnswer = rnd.Next(2, 11);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(2, 11);
-                                }
-                                Debug.Log("answer not more than 10 ");
-                            }
-                            else if (questionCount > 20 && questionCount <= 40) // not more than 20
-                            {
-                                randomAnswer = rnd.Next(11, 21);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(11, 21);
-                                }
-                                Debug.Log("answer not more than 20 ");
-                            }
-                            else if (questionCount > 40 && questionCount <= 60) // not more than 30
-                            {
-                                randomAnswer = rnd.Next(21, 31);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(21, 31);
-                                }
-                                Debug.Log("answer not more than 30 ");
-                            }
-                            else if (questionCount > 60 && questionCount <= 80) // not more than 40
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(31, 41);
-                                }
-                                Debug.Log("answer not more than 40 ");
-                            }
-                            else if (questionCount > 80)
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(31, 41);
-                                }
-                                Debug.Log("answer not more than 80 ");
-                            }
-
-                            ansButton[i].onClick.AddListener(() => buttonFunction());
-                            ansButton[i]
-                                .transform.GetChild(0)
-                                .transform.GetChild(0)
-                                .GetComponent<TextMeshProUGUI>()
-                                .text = randomAnswer.ToString();
-                        }
-                    }
-                    else if (operation == 1)
-                    {
-                        if (i != buttonNum)
-                        {
-                            if (questionCount >= 0 && questionCount <= 20) // not more than 10
-                            {
-                                randomAnswer = rnd.Next(0, 6);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(0, 6);
-                                }
-                                Debug.Log("answer not more than 10 ");
-                            }
-                            else if (questionCount > 20 && questionCount <= 40) // not more than 20
-                            {
-                                randomAnswer = rnd.Next(6, 11);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(6, 11);
-                                }
-                                Debug.Log("answer not more than 20 ");
-                            }
-                            else if (questionCount > 40 && questionCount <= 60) // not more than 30
-                            {
-                                randomAnswer = rnd.Next(11, 16);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(11, 16);
-                                }
-                                Debug.Log("answer not more than 30 ");
-                            }
-                            else if (questionCount > 60 && questionCount <= 80) // not more than 40
-                            {
-                                randomAnswer = rnd.Next(16, 21);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(16, 21);
-                                }
-                                Debug.Log("answer not more than 40 ");
-                            }
-                            else if (questionCount > 80)
-                            {
-                                randomAnswer = rnd.Next(16, 21);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(16, 21);
-                                }
-                                Debug.Log("answer not more than 40 ");
-                            }
-
-                            ansButton[i].onClick.AddListener(() => buttonFunction());
-                            ansButton[i]
-                                .transform.GetChild(0)
-                                .transform.GetChild(0)
-                                .GetComponent<TextMeshProUGUI>()
-                                .text = randomAnswer.ToString();
-                        }
-                    }
-                }
-            }
-            //play notidication sound
-            if (!GameObject.Find("notification").GetComponent<AudioSource>().isPlaying)
-            {
-                GameObject.Find("notification").GetComponent<AudioSource>().Play();
-            }
-            //activate background and show question also off center;
-            transform.GetChild(0).transform.gameObject.SetActive(true);
-            transform.GetChild(2).transform.gameObject.SetActive(false);
-            transform.GetChild(3).transform.gameObject.SetActive(true);
-
+            questionIsPaused = true;
+            BuildQuestion(CorrectButtonFunction, buttonFunction);
             Time.timeScale = 0;
-            isQuestionShowUp = true;
         }
     }
 
@@ -767,504 +302,209 @@ public class GameController : MonoBehaviour
         if (!isQuestionShowUp)
         {
             Timing.gameObject.SetActive(true);
-            operation = rnd2.Next(2);
-            //if else level
-            if (level == 1)
-            {
-                //questionCount based question
-
-                if (questionCount >= 0 && questionCount <= 20)
-                { //answer not more than 10
-                    firstNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                    secNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                }
-                else if (questionCount > 20 && questionCount <= 40)
-                {
-                    firstNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-                    secNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-                    // pathController.SetFirstChildToLast();
-                    //change character
-                    if (enterLevel[1] == false)
-                    {
-                        Debug.Log("change characeter once");
-                        //  pathController.SetFirstChildToLast();
-                        enterLevel[0] = false;
-                        enterLevel[1] = true;
-                    }
-                }
-                else if (questionCount > 40 && questionCount <= 60)
-                {
-                    firstNum = rnd.Next(11, 16); // Generates random integer values between 10 and 15
-                    secNum = rnd.Next(10, 16); // Generates random integer values between 10 and 15
-                    //change character
-                    if (enterLevel[2] == false)
-                    {
-                        //  pathController.SetFirstChildToLast();
-                        enterLevel[1] = false;
-                        enterLevel[2] = true;
-                    }
-                }
-                else if (questionCount > 60 && questionCount <= 80)
-                {
-                    firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    //change character
-                    if (enterLevel[3] == false)
-                    {
-                        //  pathController.SetFirstChildToLast();
-                        enterLevel[2] = false;
-                        enterLevel[3] = true;
-                    }
-                }
-                else if (questionCount > 80)
-                {
-                    //                    Debug.Log("more than 80");
-                    firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                    //pathController.SetFirstChildToLast();
-                    //change character
-                    if (enterLevel[4] == false)
-                    {
-                        //  pathController.SetFirstChildToLast();
-                        enterLevel[3] = false;
-                        enterLevel[4] = true;
-                    }
-                }
-                answers = firstNum + secNum;
-            }
-            else if (level == 2)
-            {
-                if (operation == 0)
-                { //plus operation
-                    if (questionCount >= 0 && questionCount <= 20)
-                    { //answer not more than 5
-                        firstNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                        secNum = rnd.Next(1, 6); // Generates random integer values between 1 and 5
-                    }
-                    else if (questionCount > 20 && questionCount <= 40)
-                    {
-                        firstNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-                        secNum = rnd.Next(6, 11); // Generates random integer values between 5 and 10
-
-                        //change character
-                        if (enterLevel[1] == false)
-                        {
-                            // pathController.SetFirstChildToLast();
-                            enterLevel[0] = false;
-                            enterLevel[1] = true;
-                        }
-                    }
-                    else if (questionCount > 40 && questionCount <= 60)
-                    {
-                        firstNum = rnd.Next(11, 16); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(11, 16); // Generates random integer values between 10 and 15
-
-                        //change character
-                        if (enterLevel[2] == false)
-                        {
-                            // pathController.SetFirstChildToLast();
-                            enterLevel[1] = false;
-                            enterLevel[2] = true;
-                        }
-                    }
-                    else if (questionCount > 60 && questionCount <= 80)
-                    {
-                        firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-
-                        //change character
-                        if (enterLevel[3] == false)
-                        {
-                            //pathController.SetFirstChildToLast();
-                            enterLevel[2] = false;
-                            enterLevel[3] = true;
-                        }
-                    }
-                    else if (questionCount > 80)
-                    {
-                        Debug.Log("more than 80");
-                        firstNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(16, 21); // Generates random integer values between 10 and 15
-
-                        //change character
-                        if (enterLevel[4] == false)
-                        {
-                            //pathController.SetFirstChildToLast();
-                            enterLevel[3] = false;
-                            enterLevel[4] = true;
-                        }
-                    }
-                    answers = firstNum + secNum;
-                }
-                else if (operation == 1)
-                { // minus operation
-                    Debug.Log("minus operation");
-                    if (questionCount >= 0 && questionCount <= 20)
-                    { //answer not more than 10
-                        firstNum = rnd.Next(0, 11); // Generates random integer values between 1 and 10
-                        secNum = rnd.Next(0, 11); // Generates random integer values between 1 and 10
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 11);
-                            firstNum = rnd.Next(0, 11);
-                        }
-                    }
-                    else if (questionCount > 20 && questionCount <= 40)
-                    {
-                        //answer not more than 20
-                        firstNum = rnd.Next(0, 21); // Generates random integer values between 1 and 10
-                        secNum = rnd.Next(0, 21); // Generates random integer values between 1 and 10
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 21);
-                            firstNum = rnd.Next(0, 21);
-                        } //change character
-                        if (enterLevel[1] == false)
-                        {
-                            //pathController.SetFirstChildToLast();
-                            enterLevel[0] = false;
-                            enterLevel[1] = true;
-                        }
-                    }
-                    else if (questionCount > 40 && questionCount <= 60)
-                    {
-                        //answer not more than 30
-                        firstNum = rnd.Next(0, 31); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(0, 31); // Generates random integer values between 10 and 15
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 31);
-                            firstNum = rnd.Next(0, 31);
-                        } //change character
-                        if (enterLevel[2] == false)
-                        {
-                            //pathController.SetFirstChildToLast();
-                            enterLevel[1] = false;
-                            enterLevel[2] = true;
-                        }
-                    }
-                    else if (questionCount > 60 && questionCount <= 80)
-                    {
-                        //answer not more than 10
-                        firstNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 41);
-                            firstNum = rnd.Next(0, 41);
-                        } //change character
-                        if (enterLevel[3] == false)
-                        {
-                            //pathController.SetFirstChildToLast();
-
-                            enterLevel[2] = false;
-                            enterLevel[3] = true;
-                        }
-                    }
-                    else if (questionCount > 80)
-                    {
-                        Debug.Log("more than 80");
-                        firstNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        secNum = rnd.Next(0, 41); // Generates random integer values between 10 and 15
-                        while (secNum < firstNum || secNum == firstNum)
-                        {
-                            secNum = rnd.Next(0, 41);
-                            firstNum = rnd.Next(0, 41);
-                        }
-                        //change character
-                        if (enterLevel[4] == false)
-                        {
-                            //pathController.SetFirstChildToLast();
-                            enterLevel[3] = false;
-                            enterLevel[4] = true;
-                        }
-                    }
-                    answers = secNum - firstNum;
-                }
-            }
-
-            //asign to question gameobject
-            if (level == 1)
-            {
-                transform
-                    .GetChild(3)
-                    .transform.GetChild(0)
-                    .transform.GetChild(0)
-                    .GetComponent<TextMeshProUGUI>()
-                    .text = firstNum + " + " + secNum + " ";
-
-                questions = firstNum + " + " + secNum + " ";
-            }
-            else if (level == 2)
-            {
-                if (operation == 0)
-                {
-                    transform
-                        .GetChild(3)
-                        .transform.GetChild(0)
-                        .transform.GetChild(0)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = firstNum + " + " + secNum + " ";
-
-                    questions = firstNum + " + " + secNum + " ";
-                }
-                else if (operation == 1)
-                {
-                    transform
-                        .GetChild(3)
-                        .transform.GetChild(0)
-                        .transform.GetChild(0)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = secNum + " - " + firstNum + " ";
-
-                    questions = secNum + " - " + firstNum + " ";
-                }
-            }
-            //assign buttons in gameobject
-
-            ansButton[0] = transform
-                .GetChild(3)
-                .transform.GetChild(1)
-                .transform.GetChild(0)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-            ansButton[1] = transform
-                .GetChild(3)
-                .transform.GetChild(1)
-                .transform.GetChild(1)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-            ansButton[2] = transform
-                .GetChild(3)
-                .transform.GetChild(2)
-                .transform.GetChild(0)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-            ansButton[3] = transform
-                .GetChild(3)
-                .transform.GetChild(2)
-                .transform.GetChild(1)
-                .transform.GetChild(0)
-                .GetComponent<Button>();
-
-            //assign random answer to random buttons
-            if (level == 1)
-            { //if level 1 only show two answer buttons
-                ansButton[2].gameObject.SetActive(false);
-                ansButton[3].gameObject.SetActive(false);
-                //choose which button to put answer
-                int buttonNum = rnd.Next(2);
-                ansButton[buttonNum].onClick.AddListener(() => CorrectButtonFunction80());
-                ansButton[buttonNum]
-                    .transform.GetChild(0)
-                    .transform.GetChild(0)
-                    .GetComponent<TextMeshProUGUI>()
-                    .text = answers.ToString();
-                for (int i = 0; i < 2; i++)
-                {
-                    if (i != buttonNum)
-                    {
-                        if (questionCount >= 0 && questionCount <= 20) // not more than 10
-                        {
-                            randomAnswer = rnd.Next(2, 11);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(2, 11);
-                            }
-                            //                            Debug.Log("answer not more than 10 ");
-                        }
-                        else if (questionCount > 20 && questionCount <= 40) // not more than 20
-                        {
-                            randomAnswer = rnd.Next(11, 21);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(10, 21);
-                            }
-                            Debug.Log("answer not more than 20 ");
-                        }
-                        else if (questionCount > 40 && questionCount <= 60) // not more than 30
-                        {
-                            randomAnswer = rnd.Next(21, 31);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(21, 31);
-                            }
-                            Debug.Log("answer not more than 30 ");
-                        }
-                        else if (questionCount > 60 && questionCount <= 80) // not more than 40
-                        {
-                            randomAnswer = rnd.Next(31, 41);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                            }
-                            //                            Debug.Log("answer not more than 40 ");
-                        }
-                        else if (questionCount > 80)
-                        {
-                            randomAnswer = rnd.Next(31, 41);
-                            while (randomAnswer == answers)
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                            }
-                            //                            Debug.Log("answer not more than 80 ");
-                        }
-
-                        ansButton[i].onClick.AddListener(() => buttonFunction80());
-                        ansButton[i]
-                            .transform.GetChild(0)
-                            .transform.GetChild(0)
-                            .GetComponent<TextMeshProUGUI>()
-                            .text = randomAnswer.ToString();
-                    }
-                }
-            }
-            else if (level == 2)
-            {
-                //only two answer buttons
-                ansButton[2].gameObject.SetActive(false);
-                ansButton[3].gameObject.SetActive(false);
-                //choose which button to put answer
-                int buttonNum = rnd.Next(2);
-                ansButton[buttonNum].onClick.AddListener(() => CorrectButtonFunction80());
-                ansButton[buttonNum]
-                    .transform.GetChild(0)
-                    .transform.GetChild(0)
-                    .GetComponent<TextMeshProUGUI>()
-                    .text = answers.ToString();
-                for (int i = 0; i < 2; i++)
-                {
-                    if (operation == 0)
-                    {
-                        if (i != buttonNum)
-                        {
-                            if (questionCount >= 0 && questionCount <= 20) // not more than 10
-                            {
-                                randomAnswer = rnd.Next(2, 11);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(2, 11);
-                                }
-                                Debug.Log("answer not more than 10 ");
-                            }
-                            else if (questionCount > 20 && questionCount <= 40) // not more than 20
-                            {
-                                randomAnswer = rnd.Next(11, 21);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(11, 21);
-                                }
-                                Debug.Log("answer not more than 20 ");
-                            }
-                            else if (questionCount > 40 && questionCount <= 60) // not more than 30
-                            {
-                                randomAnswer = rnd.Next(21, 31);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(21, 31);
-                                }
-                                Debug.Log("answer not more than 30 ");
-                            }
-                            else if (questionCount > 60 && questionCount <= 80) // not more than 40
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(31, 41);
-                                }
-                                Debug.Log("answer not more than 40 ");
-                            }
-                            else if (questionCount > 80)
-                            {
-                                randomAnswer = rnd.Next(31, 41);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(31, 41);
-                                }
-                                Debug.Log("answer not more than 80 ");
-                            }
-
-                            ansButton[i].onClick.AddListener(() => buttonFunction());
-                            ansButton[i]
-                                .transform.GetChild(0)
-                                .transform.GetChild(0)
-                                .GetComponent<TextMeshProUGUI>()
-                                .text = randomAnswer.ToString();
-                        }
-                    }
-                    else if (operation == 1)
-                    {
-                        if (i != buttonNum)
-                        {
-                            if (questionCount >= 0 && questionCount <= 20) // not more than 10
-                            {
-                                randomAnswer = rnd.Next(0, 6);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(0, 6);
-                                }
-                                Debug.Log("answer not more than 10 ");
-                            }
-                            else if (questionCount > 20 && questionCount <= 40) // not more than 20
-                            {
-                                randomAnswer = rnd.Next(6, 11);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(6, 11);
-                                }
-                                Debug.Log("answer not more than 20 ");
-                            }
-                            else if (questionCount > 40 && questionCount <= 60) // not more than 30
-                            {
-                                randomAnswer = rnd.Next(11, 16);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(11, 16);
-                                }
-                                Debug.Log("answer not more than 30 ");
-                            }
-                            else if (questionCount > 60 && questionCount <= 80) // not more than 40
-                            {
-                                randomAnswer = rnd.Next(16, 21);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(16, 21);
-                                }
-                                Debug.Log("answer not more than 40 ");
-                            }
-                            else if (questionCount > 80)
-                            {
-                                randomAnswer = rnd.Next(16, 21);
-                                while (randomAnswer == answers)
-                                {
-                                    randomAnswer = rnd.Next(16, 21);
-                                }
-                                Debug.Log("answer not more than 40 ");
-                            }
-
-                            ansButton[i].onClick.AddListener(() => buttonFunction80());
-                            ansButton[i]
-                                .transform.GetChild(0)
-                                .transform.GetChild(0)
-                                .GetComponent<TextMeshProUGUI>()
-                                .text = randomAnswer.ToString();
-                        }
-                    }
-                }
-            }
-            //play notidication sound
-            if (!GameObject.Find("notification").GetComponent<AudioSource>().isPlaying)
-            {
-                GameObject.Find("notification").GetComponent<AudioSource>().Play();
-            }
-            //activate background and show question also off center;
-            transform.GetChild(0).transform.gameObject.SetActive(true);
-            transform.GetChild(2).transform.gameObject.SetActive(false);
-            transform.GetChild(3).transform.gameObject.SetActive(true);
-
-            //Time.timeScale = 0;
-            isQuestionShowUp = true;
+            questionIsPaused = false;
+            BuildQuestion(CorrectButtonFunction80, buttonFunction80);
         }
+    }
+
+    // Called by TimeToAnswer when the countdown reaches 0: counts as a wrong answer.
+    public void OnQuestionTimeUp()
+    {
+        if (!isQuestionShowUp || answering)
+            return;
+        if (questionIsPaused)
+            buttonFunction();
+        else
+            buttonFunction80();
+    }
+
+    int correctIndex;
+    bool answering;
+    TextMeshProUGUI popup;
+
+    // run summary for the end screen
+    int runStartStars;
+    int runStartRounds;
+    int streak;
+    int bestStreak;
+    TextMeshProUGUI summary;
+
+    static int Saved(string key)
+    {
+        return PlayerPrefs.GetInt(key + PlayerPrefs.GetInt("CurrentPlayerNo_"));
+    }
+
+    void CountAnswer(bool correct)
+    {
+        streak = correct ? streak + 1 : 0;
+        bestStreak = Mathf.Max(bestStreak, streak);
+    }
+
+    public void ShowRunSummary()
+    {
+        Transform title = endMenuScreen.Find("Title");
+        if (title)
+        {
+            title.GetComponent<TMP_Text>().text = "GAME OVER";
+        }
+
+        if (!summary)
+        {
+            var go = new GameObject("Summary", typeof(RectTransform), typeof(TextMeshProUGUI));
+            go.transform.SetParent(endMenuScreen, false);
+            summary = go.GetComponent<TextMeshProUGUI>();
+            summary.font = levelText.font;
+            summary.fontSharedMaterial = levelText.fontSharedMaterial;
+            summary.fontSize = 70;
+            summary.alignment = TextAlignmentOptions.Center;
+            summary.raycastTarget = false;
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = new Vector2(0f, -1380f);
+            rt.sizeDelta = new Vector2(1400f, 300f);
+        }
+        int stars = Mathf.Max(0, Saved("StarsCollected_") - runStartStars);
+        int rounds = Mathf.Max(0, Saved("RoundsCollected_") - runStartRounds);
+        summary.text =
+            "STARS +" + stars + "   ROUNDS +" + rounds
+            + "\nQUESTIONS " + questionCount + "   BEST STREAK " + bestStreak;
+    }
+
+    static void ResetAnswerButton(Button button)
+    {
+        button.interactable = true;
+        button.transform.localScale = Vector3.one;
+        ((RectTransform)button.transform).anchoredPosition = Vector2.zero;
+        button.transform.GetChild(0).GetComponent<Image>().color = UiColors.Primary;
+    }
+
+    // Shows which answer was right (and shakes the wrong one) for a moment, then continues.
+    IEnumerator Feedback(bool correct, System.Action then)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            ansButton[i].onClick.RemoveAllListeners();
+            ansButton[i].interactable = false;
+        }
+
+        Transform right = ansButton[correctIndex].transform;
+        Transform wrong = ansButton[1 - correctIndex].transform;
+        right.GetChild(0).GetComponent<Image>().color = UiColors.Correct;
+        if (!correct)
+        {
+            wrong.GetChild(0).GetComponent<Image>().color = UiColors.Wrong;
+        }
+
+        const float duration = 0.55f;
+        for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
+        {
+            float k = t / duration;
+            if (correct)
+            {
+                right.localScale = Vector3.one * (1f + 0.12f * Mathf.Sin(k * Mathf.PI));
+            }
+            else
+            {
+                ((RectTransform)wrong).anchoredPosition = new Vector2(Mathf.Sin(t * 60f) * 28f * (1f - k), 0f);
+            }
+            yield return null;
+        }
+
+        right.localScale = Vector3.one;
+        ((RectTransform)wrong).anchoredPosition = Vector2.zero;
+        then();
+    }
+
+    // "+N" floats from the question to the star counter.
+    IEnumerator StarPopup(int amount)
+    {
+        if (amount <= 0)
+            yield break;
+
+        if (!popup)
+        {
+            var go = new GameObject("StarPopup", typeof(RectTransform), typeof(TextMeshProUGUI));
+            go.transform.SetParent(transform, false);
+            popup = go.GetComponent<TextMeshProUGUI>();
+            popup.font = levelText.font;
+            popup.fontSharedMaterial = levelText.fontSharedMaterial;
+            popup.fontSize = 170;
+            popup.alignment = TextAlignmentOptions.Center;
+            popup.enableWordWrapping = false;
+            popup.raycastTarget = false;
+            popup.color = UiColors.Star;
+        }
+
+        Vector3 start = transform.GetChild(3).GetChild(0).position;
+        Vector3 end = moneyTransform.position;
+        popup.text = "+" + amount;
+        popup.transform.SetAsLastSibling();
+        popup.gameObject.SetActive(true);
+
+        const float duration = 0.85f;
+        for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
+        {
+            float k = Mathf.SmoothStep(0f, 1f, t / duration);
+            popup.transform.position = Vector3.Lerp(start, end, k);
+            popup.transform.localScale = Vector3.one * Mathf.Lerp(1.2f, 0.6f, k);
+            popup.alpha = t / duration > 0.7f ? Mathf.InverseLerp(1f, 0.7f, t / duration) : 1f;
+            yield return null;
+        }
+        popup.gameObject.SetActive(false);
+    }
+
+    void BuildQuestion(UnityAction onCorrect, UnityAction onWrong)
+    {
+        int tier = QuestionGenerator.TierFor(questionCount);
+        //change character / tile set once per tier
+        if (tier > 0 && !enterLevel[tier])
+        {
+            enterLevel[tier - 1] = false;
+            enterLevel[tier] = true;
+        }
+
+        FunMath.Question q = QuestionGenerator.Generate(rnd, level, questionCount, questions);
+        operation = q.IsSubtraction ? 1 : 0;
+        firstNum = q.First;
+        secNum = q.Second;
+        answers = q.Answer;
+        randomAnswer = q.Distractor;
+        questions = q.Text;
+
+        Transform ui = transform.GetChild(3);
+        ui.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = q.Text;
+
+        ansButton[0] = ui.GetChild(1).GetChild(0).GetChild(0).GetComponent<Button>();
+        ansButton[1] = ui.GetChild(1).GetChild(1).GetChild(0).GetComponent<Button>();
+        ansButton[2] = ui.GetChild(2).GetChild(0).GetChild(0).GetComponent<Button>();
+        ansButton[3] = ui.GetChild(2).GetChild(1).GetChild(0).GetComponent<Button>();
+
+        //only two answer buttons are used
+        ansButton[2].gameObject.SetActive(false);
+        ansButton[3].gameObject.SetActive(false);
+
+        correctIndex = rnd.Next(2);
+        answering = false;
+        for (int i = 0; i < 2; i++)
+        {
+            bool isCorrect = i == correctIndex;
+            ResetAnswerButton(ansButton[i]);
+            ansButton[i].onClick.RemoveAllListeners();
+            ansButton[i].onClick.AddListener(isCorrect ? onCorrect : onWrong);
+            ansButton[i].transform.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = (
+                isCorrect ? q.Answer : q.Distractor
+            ).ToString();
+        }
+
+        //play notidication sound
+        Sfx.PlayIfIdle("notification");
+        //activate background and show question also off center;
+        transform.GetChild(0).gameObject.SetActive(true);
+        transform.GetChild(2).gameObject.SetActive(false);
+        ui.gameObject.SetActive(true);
+
+        isQuestionShowUp = true;
     }
 
     public void HideQuestionsButtons()
@@ -1351,9 +591,12 @@ public class GameController : MonoBehaviour
     void Start()
     {
         PlayerPrefs.SetInt("MaxCharacters", PathController.instance.TransformAnimList.Count);
-        if (PlayerPrefs.GetInt("Character_No_0") == 0)
+        bool unlocksInitialised =
+            PlayerPrefs.GetInt("CharacterUnlocksInit") == 1
+            || PlayerPrefs.GetInt("Character_No_0") == 1;
+        PlayerPrefs.SetInt("CharacterUnlocksInit", 1);
+        if (!unlocksInitialised)
         {
-            Debug.Log("true");
             for (int i = 0; i < PathController.instance.TransformAnimList.Count; i++)
             {
                 if (i == 0)
@@ -1397,8 +640,6 @@ public class GameController : MonoBehaviour
     {
         if (gameStart)
         {
-            levelText.text = "LEVEL " + level.ToString();
-
             if (pathController.DistanceBetween < 2f)
             {
                 if (questionCount < 80)
@@ -1444,6 +685,10 @@ public class GameController : MonoBehaviour
             itemsToHide[i].gameObject.SetActive(false);
         }
         gameStart = true;
+        levelText.text = "LEVEL " + level;
+        runStartStars = Saved("StarsCollected_");
+        runStartRounds = Saved("RoundsCollected_");
+        streak = bestStreak = 0;
 
         if (!music[1].isPlaying)
         {

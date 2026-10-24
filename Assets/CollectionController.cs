@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -19,41 +17,59 @@ public class CollectionController : MonoBehaviour
 
     public int roundsTotal;
     public int starsTotal;
-    //public int health;
 
-    // Start is called before the first frame update
+    // Other scripts (shop, reset, delete) write PlayerPrefs directly, so re-read a few times a second.
+    const float RefreshInterval = 0.25f;
+    float nextRefresh;
+    int shownStars = -1;
+    int shownRounds = -1;
+
+    static string StarsKey => "StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_");
+    static string RoundsKey => "RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_");
+
     void Start()
     {
-        stars = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
-        roundsTotal = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
-        textStar = GameObject.Find("textStar")
-            .GetComponent<TextMeshProUGUI>();
-
-        textRound = GameObject.Find("textRound")
-            .GetComponent<TextMeshProUGUI>();
+        textStar = GameObject.Find("textStar").GetComponent<TextMeshProUGUI>();
+        textRound = GameObject.Find("textRound").GetComponent<TextMeshProUGUI>();
+        Refresh();
     }
-
 
     public void addStars(int star)
     {
-        stars += star;
-        PlayerPrefs.SetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), stars);
+        stars = PlayerPrefs.GetInt(StarsKey) + star;
+        PlayerPrefs.SetInt(StarsKey, stars);
+        Refresh();
     }
 
     public void addRounds(int round)
     {
-        roundsTotal += round;
-        PlayerPrefs.SetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), roundsTotal);
+        roundsTotal = PlayerPrefs.GetInt(RoundsKey) + round;
+        PlayerPrefs.SetInt(RoundsKey, roundsTotal);
+        Refresh();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        stars = PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
-        roundsTotal = PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
-        textStar.text = stars.ToString();
-        textRound.text = roundsTotal.ToString();
+        if (Time.unscaledTime >= nextRefresh)
+        {
+            nextRefresh = Time.unscaledTime + RefreshInterval;
+            Refresh();
+        }
     }
 
-
+    void Refresh()
+    {
+        stars = PlayerPrefs.GetInt(StarsKey);
+        roundsTotal = PlayerPrefs.GetInt(RoundsKey);
+        if (stars != shownStars)
+        {
+            shownStars = stars;
+            textStar.text = stars.ToString();
+        }
+        if (roundsTotal != shownRounds)
+        {
+            shownRounds = roundsTotal;
+            textRound.text = roundsTotal.ToString();
+        }
+    }
 }

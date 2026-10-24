@@ -31,19 +31,19 @@ public class PlayerDeleteController : MonoBehaviour
 
         using (
             UnityWebRequest www = UnityWebRequest.Get(
-                "https://app-hanana.com/funmath/fetchDelete.php?name="
-                    + PlayerPrefs.GetString("CurrentPlayer_")
+                ServerApi.Delete(
+                    PlayerPrefs.GetString("CurrentPlayer_"),
+                    PlayerPrefs.GetString("CurrentPlayerid_")
+                )
             )
         )
         {
+            www.timeout = ServerApi.TimeoutSeconds;
             yield return www.SendWebRequest();
-            if (
-                www.result == UnityWebRequest.Result.ConnectionError
-                || www.result == UnityWebRequest.Result.ProtocolError
-            )
+            if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
-                Debug.Log("error server");
+                text.text = "DELETE FAILED. CHECK CONNECTION";
             }
             else
             {
@@ -87,19 +87,13 @@ public class PlayerDeleteController : MonoBehaviour
 
                                 GetComponent<Animator>().Play("dismiss");
                       */
-                    for (int a = 0; a < transformController.userCollection.Count; a++)
+                    int removeIndex = transformController.userCollection.IndexOf(
+                        "Player_" + PlayerPrefs.GetInt("CurrentPlayerNo_")
+                    );
+                    if (removeIndex >= 0)
                     {
-                        if (
-                            PlayerPrefs.GetString(transformController.userCollection[a])
-                            == PlayerPrefs.GetString(
-                                "Player_" + PlayerPrefs.GetInt("CurrentPlayerNo_")
-                            )
-                        )
-                        {
-                            transformController.userCollection.RemoveAt(a);
-                            a = 100;
-                            Debug.Log("user count : " + transformController.userCollection.Count);
-                        }
+                        transformController.userCollection.RemoveAt(removeIndex);
+                        transformController.userIdCollection.RemoveAt(removeIndex);
                     }
                     //yield return new WaitForSeconds(0.5f);
                     PlayerPrefs.DeleteKey(
@@ -111,13 +105,22 @@ public class PlayerDeleteController : MonoBehaviour
                     PlayerPrefs.DeleteKey("Player_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
                     PlayerPrefs.DeleteKey("Playerid_" + PlayerPrefs.GetInt("CurrentPlayerNo_"));
                     PlayerPrefs.SetInt("PlayerTotal", PlayerPrefs.GetInt("PlayerTotal") - 1);
-                    PlayerPrefs.SetString(
-                        "CurrentPlayer_",
-                        PlayerPrefs.GetString(transformController.userCollection[0])
-                    );
-                    string tempNom = transformController.userCollection[0];
-                    string nom = tempNom.Substring(tempNom.Length - 1);
-                    PlayerPrefs.SetInt("CurrentPlayerNo_", Int32.Parse(nom));
+                    if (transformController.userCollection.Count > 0)
+                    {
+                        string tempNom = transformController.userCollection[0];
+                        PlayerPrefs.SetString("CurrentPlayer_", PlayerPrefs.GetString(tempNom));
+                        PlayerPrefs.SetString(
+                            "CurrentPlayerid_",
+                            PlayerPrefs.GetString(transformController.userIdCollection[0])
+                        );
+                        PlayerPrefs.SetInt("CurrentPlayerNo_", GameStartupController.SlotFromKey(tempNom));
+                    }
+                    else
+                    {
+                        PlayerPrefs.SetString("CurrentPlayer_", "");
+                        PlayerPrefs.SetString("CurrentPlayerid_", "");
+                        PlayerPrefs.SetInt("CurrentPlayerNo_", 0);
+                    }
                     CurrentPlayerName.instance.ApplyName();
                     ///
                     GetComponent<Animator>()
@@ -158,9 +161,8 @@ public class PlayerDeleteController : MonoBehaviour
     void PlayerDetails()
     {
         text.text = "DELETE ACCOUNT: " + PlayerPrefs.GetString("CurrentPlayer_").ToString();
+        btnConfirm.onClick.RemoveAllListeners();
         btnConfirm.onClick.AddListener(ResetData);
     }
 
-    // Update is called once per frame
-    void Update() { }
 }

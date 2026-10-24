@@ -53,17 +53,24 @@ public class CharacterSelectionController : MonoBehaviour
             lockImage.GetComponent<Animator>().Play("lockDisappear");
             yield return new WaitForSeconds(1);
             BeliPrompt.gameObject.SetActive(true);
-            if (!GameObject.Find("unlocked").transform.GetComponent<AudioSource>().isPlaying)
-            {
-                GameObject.Find("unlocked").transform.GetComponent<AudioSource>().Play();
-            }
+            Sfx.PlayIfIdle("unlocked");
             yield return new WaitForSeconds(1.5f);
             ReassignImageandName();
 
         }
         else
         {
-            Debug.Log("Tak cukup duit");
+            ReassignImageandName();
+            // flash whichever requirement is missing
+            Color coinColour = coinsNeededText.color;
+            Color trophyColour = trophyNeededText.color;
+            if (PlayerPrefs.GetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_")) < coinsNeeded)
+                coinsNeededText.color = UiColors.Wrong;
+            if (PlayerPrefs.GetInt("RoundsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_")) < trophyNeeded)
+                trophyNeededText.color = UiColors.Wrong;
+            yield return new WaitForSeconds(0.8f);
+            coinsNeededText.color = coinColour;
+            trophyNeededText.color = trophyColour;
         }
 
     }
@@ -94,7 +101,7 @@ public class CharacterSelectionController : MonoBehaviour
 
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
             characterImage.color = new Color32(255, 255, 255, 255);
-            ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "PILIH";
+            ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "SELECT";
             lockImage.gameObject.SetActive(false);
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.AddListener(() => ApplyCharacter());
         }
@@ -103,7 +110,7 @@ public class CharacterSelectionController : MonoBehaviour
 
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.RemoveAllListeners();
             characterImage.color = new Color32(190, 190, 190, 255);
-            ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "BELI";
+            ButtonPilih.transform.GetChild(0).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "BUY";
             lockImage.gameObject.SetActive(true);
             ButtonPilih.GetChild(0).GetComponent<Button>().onClick.AddListener(() => BeliCharacter());
         }
@@ -139,9 +146,4 @@ public class CharacterSelectionController : MonoBehaviour
         PathController.instance.SetFirstChildToLast(listNum);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

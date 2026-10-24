@@ -1,0 +1,6 @@
+{
+    "name": "FunMath.Questions",
+    "rootNamespace": "FunMath",
+    "autoReferenced": true,
+    "noEngineReferences": true
+}

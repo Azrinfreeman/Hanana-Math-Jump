@@ -100,84 +100,145 @@ public class TransformController : MonoBehaviour
         StartCoroutine(fetchRanking());
     }
 
+    TextMeshProUGUI status;
+
+    void ShowStatus(string text, bool retry)
+    {
+        if (!status)
+        {
+            var go = new GameObject("Status", typeof(RectTransform), typeof(TextMeshProUGUI), typeof(Button));
+            go.transform.SetParent(transform.parent, false);
+            status = go.GetComponent<TextMeshProUGUI>();
+            status.font = GameController.instance.levelText.font;
+            status.fontSharedMaterial = status.font.material;
+            status.fontSize = 80;
+            status.alignment = TextAlignmentOptions.Center;
+            status.color = new Color32(70, 70, 70, 255);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(60f, 60f);
+            rt.offsetMax = new Vector2(-60f, -60f);
+            var button = go.GetComponent<Button>();
+            button.targetGraphic = status;
+            button.onClick.AddListener(() =>
+            {
+                if (status.raycastTarget)
+                    AddPrefabRanking();
+            });
+        }
+        status.text = text;
+        status.raycastTarget = retry;
+        status.transform.SetAsLastSibling();
+        status.gameObject.SetActive(true);
+    }
+
+    void HideStatus()
+    {
+        if (status)
+            status.gameObject.SetActive(false);
+    }
+
+    static readonly Color Silver = new Color32(190, 196, 208, 255);
+    static readonly Color Bronze = new Color32(205, 127, 50, 255);
+
     IEnumerator fetchRanking()
     {
         userIdCollection.Clear();
         userCollection.Clear();
-        //Debug.Log("fetchRanking");
-        using (
-            UnityWebRequest www = UnityWebRequest.Get(
-                "https://app-hanana.com/funmath/fetchRanking.php"
-            )
-        )
+        foreach (Transform old in listClones)
         {
+            if (old)
+                Destroy(old.gameObject);
+        }
+        listClones.Clear();
+        ShowStatus("LOADING...", false);
+
+        using (UnityWebRequest www = UnityWebRequest.Get(ServerApi.FetchRanking))
+        {
+            www.timeout = ServerApi.TimeoutSeconds;
             yield return www.SendWebRequest();
-            if (
-                www.result == UnityWebRequest.Result.ConnectionError
-                || www.result == UnityWebRequest.Result.ProtocolError
-            )
+            if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.Log(www.error);
-                Debug.Log("error server");
+                ShowStatus("NO CONNECTION\nTAP TO RETRY", true);
+                yield break;
             }
-            else
+
+            //name in server head json must be ranking
+            try
             {
-                //name in server head json must be ranking
-                //Debug.Log(www.downloadHandler.text);
                 rankings = JsonUtility.FromJson<RankingList>(www.downloadHandler.text);
-                //Debug.Log(rankings.ranking);
-                for (int i = 0; i < rankings.ranking.Length; i++)
-                {
-                    Transform content = Instantiate(
-                        childrenContentPrefab,
-                        new Vector3(0, 0, 0),
-                        Quaternion.identity
-                    );
-                    content.SetParent(transform);
-                    content.localScale = new Vector3(1, 1, 1);
-                    content.localPosition = new Vector3(0, 0, 0);
-
-                    listClones.Add(content);
-                }
-                int l = 1;
-                for (int i = 0; i < rankings.ranking.Length; i++)
-                {
-                    //name
-                    //                    Debug.Log(l.ToString() + ". ");
-
-
-                    //name
-                    //Debug.Log(rankings.ranking[i].nama);
-                    //score
-                    //                Debug.Log(rankings.ranking[i].score.ToString());
-                    if (
-                        rankings.ranking[i].nama.Equals(PlayerPrefs.GetString("CurrentPlayer_"))
-                        && rankings
-                            .ranking[i]
-                            .id_ingame.Equals(PlayerPrefs.GetString("CurrentPlayerid_"))
-                    )
-                    {
-                        listClones[i].transform.GetChild(0).GetComponent<Image>().color =
-                            new Color32(144, 0, 255, 255);
-                    }
-                    listClones[i]
-                        .transform.GetChild(0)
-                        .transform.GetChild(0)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = l.ToString() + ". ";
-                    listClones[i]
-                        .transform.GetChild(0)
-                        .transform.GetChild(1)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = rankings.ranking[i].nama;
-                    listClones[i]
-                        .transform.GetChild(0)
-                        .transform.GetChild(2)
-                        .GetComponent<TextMeshProUGUI>()
-                        .text = rankings.ranking[i].score.ToString();
-                    l++;
-                }
             }
+            catch (System.ArgumentException e)
+            {
+                Debug.Log(e.Message);
+                rankings = null;
+            }
+            if (rankings == null || rankings.ranking == null || rankings.ranking.Length == 0)
+            {
+                ShowStatus("NO CONNECTION\nTAP TO RETRY", true);
+                yield break;
+            }
+        }
+
+        HideStatus();
+        // keep the rows clear of the scrollbar on the right
+        float rowWidth = ((RectTransform)transform).rect.width - 100f;
+        string me = PlayerPrefs.GetString("CurrentPlayer_");
+        string myId = PlayerPrefs.GetString("CurrentPlayerid_");
+        int ownIndex = -1;
+
+        for (int i = 0; i < rankings.ranking.Length; i++)
+        {
+            Transform content = Instantiate(childrenContentPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+            content.SetParent(transform);
+            content.localScale = new Vector3(1, 1, 1);
+            content.localPosition = new Vector3(0, 0, 0);
+            var rowRect = (RectTransform)content;
+            // shrink the whole row (bar and columns together) so it stays clear of the scrollbar
+            float fullWidth = rowRect.rect.width > 0f ? rowRect.rect.width : 1299.4f;
+            content.localScale = Vector3.one * Mathf.Clamp(rowWidth / fullWidth, 0.5f, 1f);
+            listClones.Add(content);
+
+            Transform row = content.GetChild(0);
+            Ranking entry = rankings.ranking[i];
+            TextMeshProUGUI rankText = row.GetChild(0).GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI nameText = row.GetChild(1).GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI scoreText = row.GetChild(2).GetComponent<TextMeshProUGUI>();
+            rankText.text = (i + 1) + ".";
+            nameText.text = TextUtil.Printable(nameText, entry.nama);
+            scoreText.text = entry.score.ToString();
+            // shrink long ranks, names and scores to fit instead of spilling out of the row
+            foreach (TextMeshProUGUI label in new[] { rankText, nameText, scoreText })
+            {
+                label.fontSizeMax = label.fontSize;
+                label.fontSizeMin = 24f;
+                label.enableAutoSizing = true;
+            }
+
+            Image bg = row.GetComponent<Image>();
+            bool own = entry.nama.Equals(me) && entry.id_ingame.Equals(myId);
+            if (own)
+            {
+                bg.color = UiColors.Primary;
+                ownIndex = i;
+            }
+            else if (i < 3)
+            {
+                bg.color = i == 0 ? UiColors.Star : i == 1 ? Silver : Bronze;
+                Color dark = new Color32(45, 45, 45, 255);
+                rankText.color = nameText.color = scoreText.color = dark;
+            }
+        }
+
+        // scroll so the player's own row is in view
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        ScrollRect scroll = GetComponentInParent<ScrollRect>();
+        if (scroll && ownIndex > 0 && listClones.Count > 1)
+        {
+            scroll.verticalNormalizedPosition = Mathf.Clamp01(1f - (float)ownIndex / (listClones.Count - 1));
         }
     }
 

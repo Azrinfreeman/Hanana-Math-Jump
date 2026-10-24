@@ -17,7 +17,10 @@ public class LandsController : MonoBehaviour
     {
 
         yield return new WaitForSeconds(16f);
-        LandsList[countland].gameObject.SetActive(false);
+        if (countland < LandsList.Count && LandsList[countland])
+        {
+            Destroy(LandsList[countland].gameObject);
+        }
         countland++;
         //LandsList.RemoveAt(countland);
     }
@@ -28,13 +31,5 @@ public class LandsController : MonoBehaviour
         instance = this;
     }
 
-    // Start is called before the first frame update
-    void Start() { }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-
-    }
 }

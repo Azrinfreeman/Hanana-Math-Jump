@@ -11,9 +11,4 @@ public class VersionCheck : MonoBehaviour
         GetComponent<TextMeshProUGUI>().text = "v" + Application.version;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

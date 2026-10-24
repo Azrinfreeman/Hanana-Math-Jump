@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,28 +15,32 @@ public class TimeRemainingController : MonoBehaviour
     public float timeRemaining;
     private float timeFull;
 
-    // Start is called before the first frame update
+    Slider slider;
+    TextMeshProUGUI label;
+    int shownSecond = -1;
+
     void Start()
     {
         pathController = GameObject.Find("Player").GetComponent<PathController>();
+        slider = GetComponent<Slider>();
+        label = transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (GameController.instance.gameStart)
+        if (GameController.instance.gameStart && pathController.moveSpeed > 0f)
         {
             timeFull = pathController.OriginalDistanceBetween / pathController.moveSpeed;
-            GetComponent<Slider>().maxValue = timeFull * 100;
+            slider.maxValue = timeFull * 100;
             timeRemaining = pathController.DistanceBetween / pathController.moveSpeed;
+            slider.value = timeRemaining * 100;
 
-            //        Debug.Log("TimeRemaining: " + timeRemaining);
-            GetComponent<Slider>().value = timeRemaining * 100;
-            transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = timeRemaining.ToString(
-                "00"
-            );
-
-            //Debug.Log(timeFull + ": TimeFull");
+            int second = Mathf.RoundToInt(timeRemaining);
+            if (second != shownSecond)
+            {
+                shownSecond = second;
+                label.text = second.ToString("00");
+            }
         }
     }
 }

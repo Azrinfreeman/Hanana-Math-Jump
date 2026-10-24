@@ -46,8 +46,9 @@ public class DetailPlayer : MonoBehaviour
         button.onClick.RemoveAllListeners();
         button.transform.gameObject.SetActive(true);
         //Debug.Log());
-        names.text = PlayerPrefs.GetString(
-            transformController.userCollection[transform.GetSiblingIndex()]
+        names.text = TextUtil.Printable(
+            names,
+            PlayerPrefs.GetString(transformController.userCollection[transform.GetSiblingIndex()])
         );
 
         if (PlayerPrefs.GetInt("PlayerTotal") > 1)
@@ -61,23 +62,22 @@ public class DetailPlayer : MonoBehaviour
                 ) == PlayerPrefs.GetString("CurrentPlayerid_")
             )
             {
-                transform.GetChild(0).GetComponent<Image>().color = new Color32(144, 0, 255, 255);
+                transform.GetChild(0).GetComponent<Image>().color = UiColors.Primary;
                 button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "DELETE";
-                button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.yellow;
+                button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = UiColors.Star;
                 button.onClick.AddListener(() => DisplayDelete());
             }
             else
             {
-                button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "TUKAR";
-                button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = Color.green;
+                button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "SWITCH";
+                button.transform.GetChild(0).GetComponent<TextMeshProUGUI>().color = UiColors.Correct;
                 button.onClick.AddListener(() => TukarPlayer());
             }
         }
         else
         {
             string tempNom = transformController.userCollection[0];
-            string nom = tempNom.Substring(tempNom.Length - 1);
-            if (Int32.Parse(nom) == PlayerPrefs.GetInt("CurrentPlayerNo_"))
+            if (GameStartupController.SlotFromKey(tempNom) == PlayerPrefs.GetInt("CurrentPlayerNo_"))
             {
                 button.transform.gameObject.SetActive(false);
                 //button.onClick.AddListener(() => DisplayDelete());
@@ -98,9 +98,8 @@ public class DetailPlayer : MonoBehaviour
     public void TukarPlayer()
     {
         string tempNom = transformController.userCollection[transform.GetSiblingIndex()];
-        string nom = tempNom.Substring(tempNom.Length - 1);
         PlayerPrefs.SetString("CurrentPlayer_", PlayerPrefs.GetString(tempNom));
-        PlayerPrefs.SetInt("CurrentPlayerNo_", Int32.Parse(nom));
+        PlayerPrefs.SetInt("CurrentPlayerNo_", GameStartupController.SlotFromKey(tempNom));
         PlayerPrefs.SetString(
             "CurrentPlayerid_",
             PlayerPrefs.GetString(transformController.userIdCollection[transform.GetSiblingIndex()])
@@ -110,6 +109,4 @@ public class DetailPlayer : MonoBehaviour
         transformController.DismissPlayerSelect();
     }
 
-    // Update is called once per frame
-    void Update() { }
 }

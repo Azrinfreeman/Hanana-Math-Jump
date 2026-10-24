@@ -14,6 +14,10 @@ public class PathController : MonoBehaviour
         {
             instance = this;
         }
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            TransformAnimList.Add(transform.GetChild(i).GetComponent<Transform>());
+        }
     }
 
     [Header("PlayerInformation")]
@@ -22,6 +26,7 @@ public class PathController : MonoBehaviour
 
     public List<Transform> TransformAnimList;
     public float jumpForce = 2.0f;
+    const float TurnSpeed = 720f;
     public Vector3 jump;
 
     [SerializeField]
@@ -58,10 +63,6 @@ public class PathController : MonoBehaviour
             .GetChild(0)
             .transform.GetChild(transform.GetChild(0).childCount - 1)
             .GetComponent<Transform>();
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            TransformAnimList.Add(transform.GetChild(i).GetComponent<Transform>());
-        }
         StartCoroutine(delayStartCode());
         SetFirstChildToLast(PlayerPrefs.GetInt("CurrentCharacterNo_"));
         //transform.position = Vector3.MoveTowards(transform.position, Points[pointIndex].transform.position, moveSpeed *Time.deltaTime);
@@ -149,17 +150,23 @@ public class PathController : MonoBehaviour
 
             //calculate the distance between player and the first obstacles
             Vector3 player = transform.position;
-            Vector3 obstacles = ObstaclesController.instance.ObstaclesList[0].position;
-            DistanceBetween = (obstacles - player).magnitude;
-            if (!isOriginalDistance)
+            if (ObstaclesController.instance.ObstaclesList.Count > 0)
             {
-                OriginalDistanceBetween = DistanceBetween;
-                //                Debug.Log("original : " + OriginalDistanceBetween);
-                isOriginalDistance = true;
+                Vector3 obstacles = ObstaclesController.instance.ObstaclesList[0].position;
+                DistanceBetween = (obstacles - player).magnitude;
+                if (!isOriginalDistance)
+                {
+                    OriginalDistanceBetween = DistanceBetween;
+                    //                Debug.Log("original : " + OriginalDistanceBetween);
+                    isOriginalDistance = true;
+                }
             }
             //Distance between land edge jump trigger
-            Vector3 triggerEdge = ObstaclesController.instance.TriggerJumpList[0].position;
-            DistanceBetweenEdge = (triggerEdge - player).magnitude;
+            if (ObstaclesController.instance.TriggerJumpList.Count > 0)
+            {
+                Vector3 triggerEdge = ObstaclesController.instance.TriggerJumpList[0].position;
+                DistanceBetweenEdge = (triggerEdge - player).magnitude;
+            }
 
             //Debug.Log("Distance: " + DistanceBetween);
 
@@ -173,8 +180,12 @@ public class PathController : MonoBehaviour
             // is it big enough to be reliable?
             if (towards.magnitude > 0.1f)
             {
-                // turn to face that way
-                transform.forward = towards;
+                // turn to face that way (fast, but not a snap)
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation,
+                    Quaternion.LookRotation(towards),
+                    TurnSpeed * Time.deltaTime
+                );
             }
 
             //if plaer already reached the points, then go to the next points
@@ -208,41 +219,37 @@ public class PathController : MonoBehaviour
         }
     }
 
+    bool isCrashing;
+
     IEnumerator startTripping()
     {
+        if (isCrashing)
+            yield break;
+        isCrashing = true;
         GameController.instance.HideQuestionsButtons();
         //set the tripping animation
         anim.SetBool("isTripping", true);
         anim.SetBool("isRunning", false);
 
-        //if player looking straight 0angle
+        //slide the player forward a little while the trip animation starts
+        Vector3 nudge = Vector3.zero;
         if (transform.eulerAngles.y > -10f && transform.eulerAngles.y < 90)
         {
-            transform.position = new Vector3(
-                transform.position.x,
-                transform.position.y,
-                transform.position.z + 0.4f
-            );
+            nudge = new Vector3(0f, 0f, 0.4f);
         }
         else if (transform.eulerAngles.y >= 90f && transform.eulerAngles.y < 180)
         {
-            transform.position = new Vector3(
-                transform.position.x + 0.4f,
-                transform.position.y,
-                transform.position.z
-            );
+            nudge = new Vector3(0.4f, 0f, 0f);
         }
-        yield return new WaitForSeconds(0.5f);
+        for (float t = 0f; t < 0.5f; t += Time.deltaTime)
+        {
+            transform.position += nudge * (Mathf.Min(Time.deltaTime, 0.5f - t) / 0.5f);
+            yield return null;
+        }
 
         isTripping = true;
-        if (!GameObject.Find("fellSfx").GetComponent<AudioSource>().isPlaying)
-        {
-            GameObject.Find("fellSfx").GetComponent<AudioSource>().Play();
-        }
-        if (!GameObject.Find("awwSfx").GetComponent<AudioSource>().isPlaying)
-        {
-            GameObject.Find("awwSfx").GetComponent<AudioSource>().Play();
-        }
+        Sfx.PlayIfIdle("fellSfx");
+        Sfx.PlayIfIdle("awwSfx");
 
         //remove one health if there are any left
         HealthController.instance.getHurt();
@@ -257,6 +264,7 @@ public class PathController : MonoBehaviour
             anim.SetBool("isRunning", true);
             //yield return new WaitForSeconds(1f);
             isTripping = false;
+            isCrashing = false;
             wind.transform.gameObject.SetActive(true);
 
             //if quetsioin 80 above then
@@ -292,6 +300,11 @@ public class PathController : MonoBehaviour
 
             PlayerPrefs.SetInt("StarsCollected_" + PlayerPrefs.GetInt("CurrentPlayerNo_"), starsCollected);
             */
+            if (GameStartupController.instance)
+            {
+                GameStartupController.instance.ApplyScoreAgain();
+            }
+            GameController.instance.ShowRunSummary();
             GameController.instance.endMenuScreen.gameObject.SetActive(true);
             GameController.instance.Bg.gameObject.SetActive(true);
             GameController.instance.isQuestionShowUp = true;
@@ -311,15 +324,12 @@ public class PathController : MonoBehaviour
                 isTriggerJump = false;
             }
             //Collect the round count
-            CollectionController.instance.rounds++;
+            CollectionController.instance.addRounds(1);
             GameController.instance.roundTransform.GetComponent<Animator>().Play("collected");
 
             yield return new WaitForSeconds(0.45f);
             //play sound
-            if (!GameObject.Find("collected").GetComponent<AudioSource>().isPlaying)
-            {
-                GameObject.Find("collected").GetComponent<AudioSource>().Play();
-            }
+            Sfx.PlayIfIdle("collected");
             yield return new WaitForSeconds(0.25f);
             GameController.instance.roundTransform.GetComponent<Animator>().Play("afterCollected");
 
@@ -327,7 +337,6 @@ public class PathController : MonoBehaviour
             //timeToReach.gameObject.SetActive(false);
             GameController.instance.questionCount++;
             GameController.instance.isQuestionShowUp = false;
-            Debug.Log("start Jump");
         }
     }
 
@@ -359,7 +368,6 @@ public class PathController : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("jumpTrigger"))
         {
-            Debug.Log("jumpExit");
             if (GameController.instance.questionCount < 80)
             {
                 timeToReach.gameObject.SetActive(true);

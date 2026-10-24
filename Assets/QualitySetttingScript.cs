@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -8,18 +6,19 @@ public class QualitySetttingScript : MonoBehaviour
 {
     public RenderPipelineAsset[] qualityLevel;
 
-    // Start is called before the first frame update
     void Start()
     {
-        transform.GetComponent<TMP_Dropdown>().value = QualitySettings.GetQualityLevel();
+        int level = PlayerPrefs.GetInt("QualityLevel", QualitySettings.GetQualityLevel());
+        transform.GetComponent<TMP_Dropdown>().SetValueWithoutNotify(level);
+        ChangeLevel(level);
     }
-
-    // Update is called once per frame
-    void Update() { }
 
     public void ChangeLevel(int value)
     {
+        if (value < 0 || value >= qualityLevel.Length)
+            return;
         QualitySettings.SetQualityLevel(value);
         QualitySettings.renderPipeline = qualityLevel[value];
+        PlayerPrefs.SetInt("QualityLevel", value);
     }
 }
